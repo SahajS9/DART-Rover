@@ -99,20 +99,11 @@ void loop()
 
 // photoresistor logic - true = high, false = low
 bool leftPR()
-{
-
-    return (analogRead(PR_0) > 512);
-}
+{return (analogRead(PR_0) > 512);}
 bool rightPR()
-{
-    analogRead(PR_1);
-    bool result = (PR_1 > 512) ? true : false;
-}
+{return (analogRead(PR_1) > 512);}
 bool midPR()
-{
-    analogRead(PR_2);
-    bool result = (PR_2 > 512) ? true : false;
-}
+{return (analogRead(PR_2) > 512);}
 // steering control
 void turnRight(int degrees)
 {
