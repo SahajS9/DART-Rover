@@ -1,81 +1,153 @@
 #include <SPI.h>
-#include <Pixy2.h>
+// #include <Pixy2.h>
 #include <Servo.h>
 
-Pixy2 pixy;   // declares Pixy object
-Servo servo1; // create servo object to control a servo
-// twelve servo objects can be created on most boards
-int pos = 0; // variable to store the servo position
-int i;       // integer for block loop
-const int delayTime = 15;
-const int PIN_SERVO = 2;
-const int PIN_PHOTO = 1;
-// leds
-const int PIN_RED = 5;
-const int PIN_GREEN = 6;
-const int PIN_BLUE = 7;
+// pin variables are in all CAPS, other variables are lowerCamelCase; and vars are zero-based indexed (starting from 0)
+// photoresistors
+#define PR_0 0;
+#define PR_1 1;
+#define PR_2 2;
 int photoresistor1;
+int photoresistor2;
+int photoresistor3;
+// pixy object
+// Pixy2 pixy;
+// servo 0 - steering
+Servo servo0;
+#define SERVO0 2;
+const int delayTime = 15;
+int pos = 0;
+// servo 1 - claw
+Servo servo1;
+#define SERVO2 2;
+// const int delayTime = 15;
+// int pos = 0;
+// motor
+Servo motor0;
+#define MOTOR0 3;
+// led 0
+#define RED0 13;
+#define BLUE0 12;
+#define GREEN0 11;
+// led 1
+#define RED1 10;
+#define BLUE1 9;
+#define GREEN1 8;
+// led 2
+#define RED2 7;
+#define BLUE2 6;
+#define GREEN2 5;
+// misc for logics
+int i;
+// bool running = false;
+bool finished = false;
+// led colors
+const int white[3] = {255, 255, 255};
+const int red[3] = {255, 0, 0};
+const int green[3] = {0, 255, 0};
+const int blue[3] = {0, 0, 255};
+const int off[3] = {0, 0, 0};
+
 
 void setup()
 {
     // serial monitor
     Serial.begin(115200); // baud rate
     Serial.print("Starting.\n");
-    // servo
-    servo1.attach(PIN_SERVO);
-    // pixy
-    pixy.init();
-    pixy.changeProg("ccc");
-    // leds
-    pinMode(PIN_RED, OUTPUT);
-    pinMode(PIN_GREEN, OUTPUT);
-    pinMode(PIN_BLUE, OUTPUT);
+    servo0.attach(SERVO0);
+    servo1.attach(SERVO1);
+    motor0.attach(MOTOR0);
+    // pixy cam
+    // pixy.init();
+    // pixy.changeProg("ccc");
+    // leds - red blue green, left (cathode) middle right
+    // function uses standard RGB format
+    pinMode(RED0, OUTPUT);
+    pinMode(BLUE0, OUTPUT);
+    pinMode(GREEN0, OUTPUT);
+    pinMode(RED1, OUTPUT);
+    pinMode(BLUE1, OUTPUT);
+    pinMode(GREEN1, OUTPUT);
+    pinMode(RED2, OUTPUT);
+    pinMode(BLUE2, OUTPUT);
+    pinMode(GREEN2, OUTPUT);
     // photoresistor
-    pinMode(PIN_PHOTO, INPUT);
+    pinMode(PR_0, INPUT);
+    pinMode(PR_1, INPUT);
+    pinMode(PR_2, INPUT);
+
+    // initial delay before loop start
+    delay(10000); // 10 seconds
 }
 
 void loop()
 {
-    photoresistor1 = analogRead(PIN_PHOTO);
-    // analogWrite(PIN_RED, 0);
-    // analogWrite(PIN_GREEN, 201);
-    // analogWrite(PIN_BLUE, 255);
-    // delay(1000);
-    int i;
-    pixy.ccc.getBlocks();
-    // camera get signature
-    if (pixy.ccc.numBlocks)
-    {
-        for (i = 0; i < pixy.ccc.numBlocks; i++)
-        {
-            // pixy.ccc.blocks[i].print();
-            if (pixy.ccc.blocks[i].m_height >= 100)
-            {
-                // Serial.println("Detected block with size > 100");
-                pos = pos + 1;
-                servo1.write(pos);
-                delay(delayTime);
-                setColor(0, 255, 0);
-            }
-            else
-            {
-                // Serial.println("Not detected");
-                setColor(255, 0, 0);
-                if (pos > 0)
-                {
-                    pos = pos - 1;
-                    servo1.write(pos);
-                    delay(delayTime);
-                    Serial.println(pos);
-                }
-            }
-        }
-    }
+    // if rover reached finish, stop loop
+    if (finished == true)
+    {return;}
+    // turn on floor-facing lights, set to white
+    setColor2(white[0], white[1], white[2]);
+
+    // if leftPR gets low signal, correct by going left
+    
+    // if rightPR gets low signal, correct by going right
+    // if middlePR gets high signal, slow down
 }
 
-void setColor(int R, int G, int B)
+
+// functions
+
+// photoresistor logic - true = high, false = low
+bool leftPR()
 {
-    analogWrite(PIN_RED, R);
-    analogWrite(PIN_GREEN, G);
-    analogWrite(PIN_BLUE, B);
+
+    return (analogRead(PR_0) > 512);
+}
+bool rightPR()
+{
+    analogRead(PR_1);
+    bool result = (PR_1 > 512) ? true : false;
+}
+bool midPR()
+{
+    analogRead(PR_2);
+    bool result = (PR_2 > 512) ? true : false;
+}
+// steering control
+void turnRight(int degrees)
+{
+    servo0.write(degrees);
+    delay(delayTime);
+}
+void turnLeft(int degrees)
+{
+    servo0.write(-degrees);
+    delay(delayTime);
+}
+
+// motor control
+// speed 90 = 0%, speed 180 = 100% forward
+void setSpeed(speed)
+{
+    motor0.write(speed);
+}
+
+// led control
+void setColor0(int R, int G, int B)
+{
+    analogWrite(RED0, R);
+    analogWrite(GREEN0, G);
+    analogWrite(BLUE0, B);
+}
+void setColor1(int R, int G, int B)
+{
+    analogWrite(RED1, R);
+    analogWrite(GREEN1, G);
+    analogWrite(BLUE1, B);
+}
+void setColor2(int R, int G, int B)
+{
+    analogWrite(RED2, R);
+    analogWrite(GREEN2, G);
+    analogWrite(BLUE2, B);
 }
