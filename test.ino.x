@@ -55,12 +55,12 @@ void loop()
         pos = pos + 1;
         servo1.write(pos);
         delay(delayTime);
-        setColor(0, 255, 0);
+        setColorw(0, 255, 0);
       }
       else
       {
         // Serial.println("Not detected");
-        setColor(255, 0, 0);
+        setColorw(255, 0, 0);
         if (pos > 0)
         {
           pos = pos - 1;
@@ -73,7 +73,7 @@ void loop()
   }
 }
 
-void setColor(int R, int G, int B)
+void setColorw(int R, int G, int B)
 {
   analogWrite(PIN_RED, R);
   analogWrite(PIN_GREEN, G);
