@@ -1,5 +1,5 @@
 # DART-Rover
-Repository for the autonomous DART rover, ENGR 7B
+Repository for the autonomous DART rover, ENGR 7B (Winter 2022)
 
 Uses PixyCam for object detection, an array of three photoresistors for line following, and two sets of RGB LEDs for lighting and/or status indication.
 
