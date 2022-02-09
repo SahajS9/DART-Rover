@@ -1,17 +1,17 @@
 // main file for DART rover autonomous functions
 // author: Sage, co-author: Aaron
 // pin variables are in all CAPS, other variables are lowerCamelCase; and vars are zero-based indexed (starting from 0)
+
 #include <SPI.h>
-// #include <Pixy2.h>
+#include <Pixy2.h>
 #include <Servo.h>
-#include <iostream>
-#include <future>
 
 // debug mode
 bool debug = true;
 
+
 // pixy object
-// Pixy2 pixy;
+Pixy2 pixy;
 
 // servo 0 - steering
 Servo servo0;
@@ -43,17 +43,17 @@ const int off[3] = {0, 0, 0};
 // misc for logics
 int i;
 bool finished = false;
-string lastLineLocation = "";
-int photoresistor0; 
+char lastLineLocation = ' '; // L = left, R = right
+int photoresistor0;
 int photoresistor1;
 int photoresistor2;
 
 void setup()
 {
-    // serial monitor   
+    // serial monitor
     Serial.begin(115200); // baud rate
-    Serial.print("Starting in 3 seconds.\n");
-    Serial.println("Engaging line following mode.");
+    Serial.println("Starting in 3 seconds.");
+    Serial.print("Engaging line following mode. (Startup)");
     // pin attachments
     servo0.attach(SERVO0);
     servo1.attach(SERVO1);
@@ -90,28 +90,31 @@ void loop()
     if (debug)
     {
         photoresistor0 = analogRead(A0);
-        Serial.println("pr0: %1").arg(photoresistor0);
-        // Serial.println(photoresistor0);
+        Serial.print("pr0: ");
+        Serial.print(photoresistor0);
+        Serial.print("\n");
         photoresistor1 = analogRead(A1);
-        Serial.println("pr1: %1").arg(photoresistor1);
-        // Serial.println(photoresistor1);
+        Serial.print("pr1: ");
+        Serial.print(photoresistor1);
+        Serial.print("\n");
         photoresistor2 = analogRead(A2);
-        Serial.println("pr2: %1").arg(photoresistor2);
-        // Serial.println(photoresistor2);
+        Serial.print("pr2: ");
+        Serial.print(photoresistor2);
+        Serial.print("\n");
     }
     // if leftPR gets low signal, correct by going left
     if (leftPR() == false)
     {
         turnLeft(15);
         setColor0(green[0], green[1], green[2]); // using aircraft standards to indicate direction of turn
-        lastLineLocation = "left";
+        lastLineLocation = 'L';
     }
     // if rightPR gets low signal, correct by going right
     if (rightPR() == false)
     {
         turnRight(15);
         setColor0(red[0], red[1], red[2]);
-        lastLineLocation = "right";
+        lastLineLocation = 'R';
     }
     // if middlePR gets high signal, slow down
     if (midPR() == true)
@@ -125,16 +128,23 @@ void loop()
         setSpeed(0);
         Serial.println("Line tracking lost. Attempting to regain in 3 seconds.");
         delay(3000);
-        if (lastLineLocation == "right") 
+        if (lastLineLocation == 'R')
         {
-            turnRight(60); setSpeed(20);
+            turnRight(60);
+            setSpeed(20);
         }
-        if (lastLineLocation == "left")
+        if (lastLineLocation == 'L')
         {
-            turnLeft(60); setSpeed(20); 
+            turnLeft(60);
+            setSpeed(20);
         }
     }
-    if (debug) {Serial.println("Line was last on %1 side.").arg(lastLineLocation);}
+    if (debug)
+    {
+        Serial.print("Line was last on side: ");
+        Serial.print(lastLineLocation);
+        Serial.print("\n");
+    }
 }
 
 // functions
@@ -158,22 +168,28 @@ void turnRight(int degrees)
 {
     servo0.write(degrees);
     delay(15);
-    Serial.println("Turning right by %1deg.").arg(degrees);
+    Serial.print("Turning right by ");
+    Serial.print(degrees);
+    Serial.print("\n");
 }
 void turnLeft(int degrees)
 {
     servo0.write(-degrees);
     delay(15);
-    Serial.println("Turning left by %1deg.").arg(degrees);
+    Serial.print("Turning left by ");
+    Serial.print(degrees);
+    Serial.print("\n");
 }
 
-// motor control
-// speed 0 = 0%, speed 100 = 100% forward, speed -100 = 100% backwards
-void setSpeed(int speed)
-{
-    speed = speed * 1.8; // since motor is servo object, 100% = 180deg
-    motor0.write(speed);
-    Serial.println("Speed set to %1%.").arg(speed);
+    // motor control
+    // speed 0 = 0%, speed 100 = 100% forward, speed -100 = 100% backwards
+    void setSpeed(int speed)
+    {
+        speed = speed * 1.8; // since motor is servo object, 100% = 180deg
+        motor0.write(speed);
+        Serial.print("Speed set to ");
+        Serial.print(speed);
+        Serial.print("\n");
 }
 
 // led control

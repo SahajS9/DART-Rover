@@ -7,3 +7,4 @@ TODO:
 - Calibrate line following
 - Change modes once target object is recognized
 - Recognize when end of course is reached
+- Asynchronous functions
