@@ -50,7 +50,7 @@ int photoresistor2;
 
 void setup()
 {
-    // serial monitor
+    // serial monitor   
     Serial.begin(115200); // baud rate
     Serial.print("Starting in 3 seconds.\n");
     Serial.println("Engaging line following mode.");
