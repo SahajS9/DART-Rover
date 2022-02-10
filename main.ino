@@ -7,8 +7,7 @@
 #include <Servo.h>
 
 // debug mode
-bool debug = true;
-
+bool debug = false;
 
 // pixy object
 Pixy2 pixy;
@@ -19,25 +18,24 @@ const int SERVO0 = 3;
 // servo 1 - claw
 Servo servo1;
 const int SERVO1 = 2;
-// int pos = 0;
 // motor
 Servo motor0;
 const int MOTOR0 = 4;
 
 // led group 0 -- indicator lights
-const int RED0 = 12;
-const int GREEN0 = 11;
-const int BLUE0 = 10;
+const int RED0 = 10;
+const int GREEN0 = 9;
+const int BLUE0 = 8;
 // led group 1 -- underglow (floor-facing)
-const int RED1 = 9;
-const int GREEN1 = 8;
-const int BLUE1 = 7;
+const int RED1 = 7;
+const int GREEN1 = 6;
+const int BLUE1 = 5;
 // led colors
 const int white[3] = {255, 255, 255};
 const int red[3] = {255, 0, 0};
 const int green[3] = {0, 255, 0};
 const int blue[3] = {0, 0, 255};
-const int yellow[3] = {255, 255, 0};
+const int yellow[3] = {255, 180, 0};
 const int off[3] = {0, 0, 0};
 
 // misc for logics
@@ -50,27 +48,26 @@ int photoresistor2;
 
 void setup()
 {
-    // serial monitor
-    Serial.begin(115200); // baud rate
-    Serial.println("Starting in 3 seconds.");
-    Serial.print("Engaging line following mode. (Startup)");
-    // pin attachments
     servo0.attach(SERVO0);
     servo1.attach(SERVO1);
     motor0.attach(MOTOR0);
-    // pixy cam
-    // pixy.init(); pixy.changeProg("ccc");
-    // leds - red blue green, left (cathode) middle right
-    // function uses standard RGB format
+    // leds - red, [], green, blue = left, (cathode), middle, right
     pinMode(RED0, OUTPUT);
     pinMode(GREEN0, OUTPUT);
     pinMode(BLUE0, OUTPUT);
     pinMode(RED1, OUTPUT);
     pinMode(GREEN1, OUTPUT);
     pinMode(BLUE1, OUTPUT);
-
+    // pixy cam
+    pixy.init();
+    pixy.changeProg("ccc");
     // initial delay before loop start, allows time to place rover on line
+    resetSteering();
+    Serial.begin(115200); // baud rate for serial monitor
+    Serial.println("Starting in 3 seconds.");
     delay(3000); // change to 10 seconds once testing on track
+    Serial.print("Engaging line following mode (Startup)\n");
+    setColor1(white[0], white[1], white[2]); // turn on floor-facing lights, set to white
 }
 
 void loop()
@@ -79,72 +76,122 @@ void loop()
     if (finished == true)
     {
         setColor1(off[0], off[1], off[2]); // floor lights off
+        setSpeed(0);
+        resetSteering();
         return;
     }
-    else
+    if (leftPR() == false && rightPR() == false && midPR() == false)
     {
-        setColor1(white[0], white[1], white[2]); // turn on floor-facing lights, set to white
+        Serial.println("All PRs have low signal: Undefined state");
+        setSpeed(0);
+        resetSteering();
+        setColor0(blue[0], blue[1], blue[2]); // flash blue 3x
+        delay(500);
+        setColor0(off[0], off[1], off[2]);
+        delay(100);
+        setColor0(blue[0], blue[1], blue[2]);
+        delay(500);
+        setColor0(off[0], off[1], off[2]);
+        delay(100);
+        setColor0(blue[0], blue[1], blue[2]);
+        delay(500);
+        setColor0(off[0], off[1], off[2]);
+        delay(100);
+        delay(3000);
+        return;
     }
-    // delay(3000); // 3 sec delay
-    // setSpeed(30); // move forward slowly
-    if (debug)
+    // if all 3 PRs are high, rover is completely off-track, try and find it again based on which side the line was; assumed rover was on line at some point
+    if (leftPR() == true && rightPR() == true && midPR() == true)
     {
-        photoresistor0 = analogRead(A0);
-        Serial.print("pr0: ");
-        Serial.print(photoresistor0);
-        Serial.print("\n");
-        photoresistor1 = analogRead(A1);
-        Serial.print("pr1: ");
-        Serial.print(photoresistor1);
-        Serial.print("\n");
-        photoresistor2 = analogRead(A2);
-        Serial.print("pr2: ");
-        Serial.print(photoresistor2);
-        Serial.print("\n");
+        setSpeed(0);
+        resetSteering();
+        Serial.println("Line tracking lost: Attempting to regain in 3 seconds");
+        setColor0(yellow[0], yellow[1], yellow[2]); // flash yellow 3x
+        delay(500);
+        setColor0(off[0], off[1], off[2]);
+        delay(100);
+        setColor0(yellow[0], yellow[1], yellow[2]);
+        delay(500);
+        setColor0(off[0], off[1], off[2]);
+        delay(100);
+        setColor0(yellow[0], yellow[1], yellow[2]);
+        delay(500);
+        setColor0(off[0], off[1], off[2]);
+        delay(1300); // total 3 seconds of delay, then lights off, then action
+        if (lastLineLocation == 'R')
+        {
+            turnRight(30);
+            setSpeed(10);
+            while (leftPR() == true && rightPR() == true && midPR() == true)
+            {
+                delay(100);
+            }
+        }
+        if (lastLineLocation == 'L')
+        {
+            turnLeft(30);
+            setSpeed(10);
+            while (leftPR() == true && rightPR() == true && midPR() == true)
+            {
+                delay(100);
+            }
+        }
+        resetSteering();
+        return;
     }
     // if leftPR gets low signal, correct by going left
     if (leftPR() == false)
     {
+        setColor0(red[0], red[1], red[2]); // using aircraft standards to indicate direction of turn
+        Serial.println("Low signal on left side");
+        setSpeed(10);
         turnLeft(15);
-        setColor0(green[0], green[1], green[2]); // using aircraft standards to indicate direction of turn
+        delay(100);
         lastLineLocation = 'L';
+        // setSpeed(20);
     }
     // if rightPR gets low signal, correct by going right
     if (rightPR() == false)
     {
-        turnRight(15);
-        setColor0(red[0], red[1], red[2]);
-        lastLineLocation = 'R';
-    }
-    // if middlePR gets high signal, slow down
-    if (midPR() == true)
-    {
+        setColor0(green[0], green[1], green[2]);
+        Serial.println("Low signal on right side");
         setSpeed(10);
-        Serial.println("Middle photoresistor detected high signal. Slowing down to allow more time to correct.");
+        turnRight(15);
+        delay(100);
+        lastLineLocation = 'R';
+        // setSpeed(20);
     }
-    if (leftPR() == true && rightPR() == true && midPR() == true)
+    Serial.print("Line was last on side: "); // if rover was ever off-track, set by previous conditionals | if empty, then rover was always on-track
+    Serial.print(lastLineLocation);
+    Serial.print("\n");
+    // if middlePR gets high signal, slow down, using above logics to correct; else failsafes to below conditionals
+    // this also means track veered more than above could account for
+    if (midPR() == true && (rightPR() == false || leftPR() == false))
     {
+        Serial.println("Middle PR has high signal: slowing down to allow more time to correct");
         setColor0(yellow[0], yellow[1], yellow[2]);
-        setSpeed(0);
-        Serial.println("Line tracking lost. Attempting to regain in 3 seconds.");
+        setSpeed(10);
         delay(3000);
-        if (lastLineLocation == 'R')
-        {
-            turnRight(60);
-            setSpeed(20);
-        }
-        if (lastLineLocation == 'L')
-        {
-            turnLeft(60);
-            setSpeed(20);
-        }
+        return;
     }
-    if (debug)
+    // this is when the rover is on-track, turn off indicators and maintain speed
+    if (midPR() == false && (rightPR() == true && leftPR() == true))
     {
-        Serial.print("Line was last on side: ");
-        Serial.print(lastLineLocation);
-        Serial.print("\n");
+        setSpeed(20);
+        resetSteering();
+        setColor0(off[0], off[1], off[2]);
+        while (midPR() == false && (rightPR() == true && leftPR() == true))
+        {
+            delay(100);
+        }
     }
+    else
+    {
+        Serial.print(leftPR());
+        Serial.print(midPR());
+        Serial.print(rightPR());
+    }
+    Serial.println("-------"); // indicates reached end of loop
 }
 
 // functions
@@ -152,44 +199,47 @@ void loop()
 // photoresistor logic - true = high, false = low
 bool leftPR()
 {
-    return (analogRead(A0) > 512);
-}
-bool rightPR()
-{
-    return (analogRead(A1) > 512);
+    return (analogRead(A0) > 40);
 }
 bool midPR()
 {
-    return (analogRead(A2) > 512);
+    return (analogRead(A1) > 40);
+}
+bool rightPR()
+{
+    return (analogRead(A2) > 40);
 }
 
-// steering control - 0 to 180 degrees
+// steering control - 0 to 180 degrees range
 void turnRight(int degrees)
 {
-    servo0.write(degrees);
-    delay(15);
+    servo0.write(90 + degrees);
     Serial.print("Turning right by ");
     Serial.print(degrees);
-    Serial.print("\n");
+    Serial.print(" degrees\n");
 }
 void turnLeft(int degrees)
 {
-    servo0.write(-degrees);
-    delay(15);
+    servo0.write(90 - degrees);
     Serial.print("Turning left by ");
     Serial.print(degrees);
-    Serial.print("\n");
+    Serial.print(" degrees\n");
+}
+void resetSteering() // servo is set to 90deg for going straight
+{
+    servo0.write(90);
+    Serial.println("Steering reset");
 }
 
-    // motor control
-    // speed 0 = 0%, speed 100 = 100% forward, speed -100 = 100% backwards
-    void setSpeed(int speed)
-    {
-        speed = speed * 1.8; // since motor is servo object, 100% = 180deg
-        motor0.write(speed);
-        Serial.print("Speed set to ");
-        Serial.print(speed);
-        Serial.print("\n");
+// motor control
+// speed 0 = 0%, speed 100 = 100% forward, speed -100 = 100% backwards
+void setSpeed(int speed)
+{
+    speed = speed * 1.8; // since motor is servo object, 100% = 180deg
+    motor0.write(speed);
+    Serial.print("Speed set to ");
+    Serial.print(speed);
+    Serial.print("\n");
 }
 
 // led control
@@ -198,18 +248,44 @@ void setColor0(int R, int G, int B)
     analogWrite(RED0, R);
     analogWrite(GREEN0, G);
     analogWrite(BLUE0, B);
-    Serial.println("Changed color for group 0.");
+    Serial.println("Changed indicator color");
 }
 void setColor1(int R, int G, int B)
 {
     analogWrite(RED1, R);
     analogWrite(GREEN1, G);
     analogWrite(BLUE1, B);
-    Serial.println("Changed color for group 1.");
+    Serial.println("Changed underglow color");
 }
-// void setColor2(int R, int G, int B)
-// {
-//     analogWrite(RED2, R);
-//     analogWrite(GREEN2, G);
-//     analogWrite(BLUE2, B);
-// }
+
+
+// misc 'fun'ctions
+void dance()
+{
+    int x = 30;
+    while (x > 0)
+    {
+        turnLeft(45);
+        delay(250);
+        turnRight(45);
+        delay(250);
+    }
+}
+void rainbowLights() // code from https://gist.github.com/jimsynz/766994#file-rgb_spectrum-c
+{
+    int rgbColor[3] = {255, 0, 0};
+    for (int decColor = 0; decColor < 3; decColor += 1)
+    {
+        int incColor = decColor == 2 ? 0 : decColor + 1;
+        // cross-fade the two colours.
+        for (int x = 0; x < 255; x += 1)
+        {
+            rgbColor[decColor] -= 1;
+            rgbColor[incColor] += 1;
+
+            setColor0(rgbColor[0], rgbColor[1], rgbColor[2]);
+            setColor1(rgbColor[0], rgbColor[1], rgbColor[2]);
+            delay(5);
+        }
+    }
+}
