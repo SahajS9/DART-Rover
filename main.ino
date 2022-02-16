@@ -65,7 +65,14 @@ void setup()
     resetSteering();
     Serial.begin(115200); // baud rate for serial monitor
     Serial.println("Starting in 3 seconds.");
-    delay(3000); // change to 10 seconds once testing on track
+    resetSteering();
+    setColor1(red[0], red[1], red[2]);
+    delay(1000);
+    setColor1(yellow[0], yellow[1], yellow[2]);
+    delay(1000);
+    setColor1(green[0], green[1], green[2]);
+    delay(1000);
+    // delay(3000); // change to 10 seconds once testing on track
     Serial.print("Engaging line following mode (Startup)\n");
     setColor1(white[0], white[1], white[2]); // turn on floor-facing lights, set to white
 }
@@ -75,9 +82,16 @@ void loop()
     // if rover reached finish line, stop loop
     if (finished == true)
     {
-        setColor1(off[0], off[1], off[2]); // floor lights off
-        setSpeed(0);
-        resetSteering();
+        for (int stopped = 0; i <= 0; i++)
+        {
+            setColor1(off[0], off[1], off[2]); // floor lights off
+            setSpeed(0);
+            resetSteering();
+            stopped = true;
+            Serial.println("Finished.")
+            delay(3000);
+            dance();
+        }
         return;
     }
     if (leftPR() == false && rightPR() == false && midPR() == false)
@@ -213,21 +227,21 @@ bool rightPR()
 // steering control - 0 to 180 degrees range
 void turnRight(int degrees)
 {
-    servo0.write(90 + degrees);
+    servo0.write(92 + degrees);
     Serial.print("Turning right by ");
     Serial.print(degrees);
     Serial.print(" degrees\n");
 }
 void turnLeft(int degrees)
 {
-    servo0.write(90 - degrees);
+    servo0.write(92 - degrees);
     Serial.print("Turning left by ");
     Serial.print(degrees);
     Serial.print(" degrees\n");
 }
-void resetSteering() // servo is set to 90deg for going straight
+void resetSteering() // servo is set to 92deg for going straight, aligns better with steering system
 {
-    servo0.write(90);
+    servo0.write(92);
     Serial.println("Steering reset");
 }
 
@@ -258,17 +272,22 @@ void setColor1(int R, int G, int B)
     Serial.println("Changed underglow color");
 }
 
-
 // misc 'fun'ctions
 void dance()
 {
-    int x = 30;
+    int x = 30; // will run for ~30 seconds
+    rainbowLights();
     while (x > 0)
     {
         turnLeft(45);
         delay(250);
         turnRight(45);
         delay(250);
+        turnLeft(45);
+        delay(250);
+        turnRight(45);
+        delay(250);
+        x--;
     }
 }
 void rainbowLights() // code from https://gist.github.com/jimsynz/766994#file-rgb_spectrum-c
