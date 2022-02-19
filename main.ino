@@ -87,14 +87,14 @@ void loop()
             setColor1(off[0], off[1], off[2]); // floor lights off
             setSpeed(0);
             resetSteering();
-            stopped = true;
-            Serial.println("Finished.")
+            stopped = 1; // == true
+            Serial.println("Finished");
             delay(3000);
             dance();
         }
         return;
     }
-    if (leftPR() == false && rightPR() == false && midPR() == false)
+    while (leftPR() == false && rightPR() == false && midPR() == false)
     {
         Serial.println("All PRs have low signal: Undefined state");
         setSpeed(0);
@@ -134,15 +134,17 @@ void loop()
         delay(1300); // total 3 seconds of delay, then lights off, then action
         if (lastLineLocation == 'R')
         {
+            setColor0(green[0], green[1], green[2]);
             turnRight(30);
             setSpeed(10);
-            while (leftPR() == true && rightPR() == true && midPR() == true)
+            while (leftPR() == true && rightPR() == true && midPR() == true) // waits until back on-track, so steering will be held until
             {
                 delay(100);
             }
         }
         if (lastLineLocation == 'L')
         {
+            setColor0(red[0], red[1], red[2]);
             turnLeft(30);
             setSpeed(10);
             while (leftPR() == true && rightPR() == true && midPR() == true)
@@ -206,23 +208,15 @@ void loop()
         Serial.print(rightPR());
     }
     Serial.println("-------"); // indicates reached end of loop
+    Serial.println("");
 }
 
 // functions
 
 // photoresistor logic - true = high, false = low
-bool leftPR()
-{
-    return (analogRead(A0) > 40);
-}
-bool midPR()
-{
-    return (analogRead(A1) > 40);
-}
-bool rightPR()
-{
-    return (analogRead(A2) > 40);
-}
+bool leftPR() {return (analogRead(A0) < 960);}
+bool midPR() {return (analogRead(A1) < 900);}
+bool rightPR() {return (analogRead(A2) < 940);}
 
 // steering control - 0 to 180 degrees range
 void turnRight(int degrees)

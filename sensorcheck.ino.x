@@ -8,6 +8,7 @@
 
 // debug mode
 bool debug = true;
+bool clawTest = true;
 
 // pixy object
 Pixy2 pixy;
@@ -74,10 +75,31 @@ void setup()
     setColor1(white[0], white[1], white[2]); // turn on floor-facing lights, set to white
     delay(500);
     setColor1(off[0], off[1], off[2]);
+
+    if (clawTest == true)
+    {
+        servo1.write(0);
+        Serial.println("Testing claw");
+        delay(5000);
+    }
 }
 
 void loop()
 {
+    if (testClaw == true)
+    {
+        for (int pos = 0, pos < 80, pos++;)
+        {
+            servo1.write(pos);
+            delay(20);
+        }
+        for (int pos = 80), pos > 0, pos--;)
+        {
+            servo1.write(pos);
+            delay(20);
+        }
+        break;
+    }
     // PR output
     photoresistor0 = analogRead(A0);
     Serial.print("pr0: ");
@@ -180,6 +202,7 @@ void loop()
     }
 
     Serial.println("--------");
+    Serial.println("");
     delay(1000);
 }
 
@@ -188,15 +211,15 @@ void loop()
 // photoresistor logic - true = high, false = low
 bool leftPR()
 {
-    return (analogRead(A0) > 40);
+    return (analogRead(A0) < 960);
 }
 bool midPR()
 {
-    return (analogRead(A1) > 40);
+    return (analogRead(A1) < 900);
 }
 bool rightPR()
 {
-    return (analogRead(A2) > 40);
+    return (analogRead(A2) < 940);
 }
 
 // steering control - 0 to 180 degrees
