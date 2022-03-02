@@ -41,7 +41,7 @@ const int yellow[3] = {255, 255, 0};
 const int off[3] = {0, 0, 0};
 
 // misc for logics
-int i;
+int i; int pos;
 bool finished = false;
 char lastLineLocation = ' '; // L = left, R = right
 int photoresistor0;
@@ -86,19 +86,19 @@ void setup()
 
 void loop()
 {
-    if (testClaw == true)
+    if (clawTest == true)
     {
-        for (int pos = 0, pos < 80, pos++;)
+        for (pos = 0; pos <= 80; pos += 1)
         {
             servo1.write(pos);
             delay(20);
         }
-        for (int pos = 80), pos > 0, pos--;)
+        for (pos = 80; pos >= 0; pos -= 1)
         {
             servo1.write(pos);
             delay(20);
         }
-        break;
+        return;
     }
     // PR output
     photoresistor0 = analogRead(A0);
