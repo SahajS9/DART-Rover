@@ -211,21 +211,13 @@ void loop()
     // delay(1000);
 }
 
+
 // functions
 
 // photoresistor logic - true = high, false = low
-bool leftPR()
-{
-    return (analogRead(A0) < 960);
-}
-bool midPR()
-{
-    return (analogRead(A1) < 900);
-}
-bool rightPR()
-{
-    return (analogRead(A2) < 940);
-}
+bool leftPR() { return (analogRead(A0) < 960); }
+bool midPR() { return (analogRead(A1) < 900); }
+bool rightPR() { return (analogRead(A2) < 940); }
 
 // steering control - 0 to 180 degrees range
 void turnRight(int degrees)
@@ -265,12 +257,49 @@ void setColor0(int R, int G, int B)
     analogWrite(RED0, R);
     analogWrite(GREEN0, G);
     analogWrite(BLUE0, B);
-    // Serial.println("Changed color for group 0.");
+    Serial.println("Changed indicator color");
 }
 void setColor1(int R, int G, int B)
 {
     analogWrite(RED1, R);
     analogWrite(GREEN1, G);
     analogWrite(BLUE1, B);
-    // Serial.println("Changed color for group 1.");
+    Serial.println("Changed underglow color");
+}
+
+// misc 'fun'ctions
+void dance()
+{
+    int x = 30; // will run for ~30 seconds
+    rainbowLights();
+    while (x > 0)
+    {
+        turnLeft(45);
+        delay(250);
+        turnRight(45);
+        delay(250);
+        turnLeft(45);
+        delay(250);
+        turnRight(45);
+        delay(250);
+        x--;
+    }
+}
+void rainbowLights() // code from https://gist.github.com/jimsynz/766994#file-rgb_spectrum-c
+{
+    int rgbColor[3] = {255, 0, 0};
+    for (int decColor = 0; decColor < 3; decColor += 1)
+    {
+        int incColor = decColor == 2 ? 0 : decColor + 1;
+        // cross-fade the two colours.
+        for (int x = 0; x < 255; x += 1)
+        {
+            rgbColor[decColor] -= 1;
+            rgbColor[incColor] += 1;
+
+            setColor0(rgbColor[0], rgbColor[1], rgbColor[2]);
+            setColor1(rgbColor[0], rgbColor[1], rgbColor[2]);
+            delay(5);
+        }
+    }
 }
