@@ -22,6 +22,14 @@
 #define LED1_R 9
 #define LED1_G 8
 #define LED1_B 7
+
+Rover rover(
+    STEERING, CLAW, MOTOR,
+    L_PHOTORESISTOR, R_PHOTORESISTOR, M_PHOTORESISTOR, 
+    LED0_R, LED0_G, LED0_B,
+    LED1_R, LED1_G, LED1_B
+);
+
 // debug mode
 bool debug = true;
 bool clawTest = true;
@@ -41,13 +49,6 @@ char lastLineLocation = ' '; // L = left, R = right
 int photoresistor0;
 int photoresistor1;
 int photoresistor2;
-
-Rover rover(
-    STEERING, CLAW, MOTOR,
-    L_PHOTORESISTOR, R_PHOTORESISTOR, M_PHOTORESISTOR, 
-    LED0_R, LED0_G, LED0_B,
-    LED1_R, LED1_G, LED1_B
-);
 
 void setup()
 {

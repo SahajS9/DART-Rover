@@ -42,10 +42,7 @@ class Rover
 
         //photoresistor logic
         // photoresistor logic - true = high, false = low
-        bool leftPR();
-        bool midPR();
-        bool rightPR();
-
+        bool isOffLine(int pr);
         //led controls
         void colorSet(int group, int R, int G, int B);
 

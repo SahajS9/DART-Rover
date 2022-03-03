@@ -6,18 +6,16 @@
 
 /**
  * Rover library
- * Methods:
- * -----------
- * -onLine()
- * -turnRight()
- * -turnLeft()
- * -turnStraight()
- * -motorSpeed()
- * -clawSet()
- * -clawSetPos()
- * -setColor()
- * -dance()
- * -rainbowLights()
+ * @param onLine()
+ * @param turnRight()
+ * @param turnLeft()
+ * @param turnStraight()
+ * @param motorSpeed()
+ * @param clawSet()
+ * @param clawSetPos()
+ * @param setColor()
+ * @param dance()
+ * @param rainbowLights()
 **/
 Rover::Rover(
     int STEERING_SERVO,
@@ -71,11 +69,11 @@ Rover::Rover(
 
 // photoresistor logic - true = high, false = low
 /**
- * Checks if rover is on line
+ * Checks if photoresistor is off the line
  * @param pr Photoresistor to check (int {0 = L, 1 = M, 2 = R})
- * @returns bool - Whether or not photoresistor is on line
+ * @returns bool - Whether or not photoresistor is off line
 **/
-bool Rover::onLine(int pr) {
+bool Rover::isOffLine(int pr) {
     if (pr==0) {
         return (analogRead(_L_PHOTORESISTOR) < 960); 
     } else if (pr==1) {
