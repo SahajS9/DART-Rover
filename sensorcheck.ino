@@ -5,33 +5,27 @@
 #include <SPI.h>
 #include <Pixy2.h>
 #include <Servo.h>
+#include "Rover.h"
 
+#define STEERING 3
+#define CLAW 2
+#define MOTOR 4
+
+#define L_PHOTORESISTOR A0
+#define M_PHOTORESISTOR A1
+#define R_PHOTORESISTOR A2
+
+#define LED0_R 12
+#define LED0_G 11
+#define LED0_B 10
+
+#define LED1_R 9
+#define LED1_G 8
+#define LED1_B 7
 // debug mode
 bool debug = true;
 bool clawTest = true;
 
-// pixy object
-Pixy2 pixy;
-
-// servo 0 - steering
-Servo servo0;
-const int SERVO0 = 3;
-// servo 1 - claw
-Servo servo1;
-const int SERVO1 = 2;
-// int pos = 0;
-// motor
-Servo motor0;
-const int MOTOR0 = 4;
-
-// led group 0 -- indicator lights
-const int RED0 = 12;
-const int GREEN0 = 11;
-const int BLUE0 = 10;
-// led group 1 -- underglow (floor-facing)
-const int RED1 = 9;
-const int GREEN1 = 8;
-const int BLUE1 = 7;
 // led colors
 const int white[3] = {255, 255, 255};
 const int red[3] = {255, 0, 0};
@@ -48,48 +42,41 @@ int photoresistor0;
 int photoresistor1;
 int photoresistor2;
 
+Rover rover(
+    STEERING, CLAW, MOTOR,
+    L_PHOTORESISTOR, R_PHOTORESISTOR, M_PHOTORESISTOR, 
+    LED0_R, LED0_G, LED0_B,
+    LED1_R, LED1_G, LED1_B
+);
+
 void setup()
 {
-    // pin attachments
-    servo0.attach(SERVO0);
-    servo1.attach(SERVO1);
-    motor0.attach(MOTOR0);
-    // pixy cam
-    pixy.init();
-    pixy.changeProg("ccc");
-    // leds - red blue green, left (cathode) middle right
-    // function uses standard RGB format
-    pinMode(RED0, OUTPUT);
-    pinMode(GREEN0, OUTPUT);
-    pinMode(BLUE0, OUTPUT);
-    pinMode(RED1, OUTPUT);
-    pinMode(GREEN1, OUTPUT);
-    pinMode(BLUE1, OUTPUT);
-
+    
     // serial monitor
     Serial.begin(115200); // baud rate
     // initial delay before loop start, allows time to place rover on line
     delay(3000); // change to 10 seconds once testing on track
+
     Serial.print("Running sensor debug script.\n");
     Serial.println("Starting in 3 seconds.");
-    setColor1(white[0], white[1], white[2]); // turn on floor-facing lights, set to white
-    delay(500);
-    setColor1(off[0], off[1], off[2]);
+    // setColor1(white[0], white[1], white[2]); // turn on floor-facing lights, set to white
+    // delay(500);
+    // setColor1(off[0], off[1], off[2]);
 
-    if (clawTest == true)
-    {
-        servo1.write(0);
-        Serial.println("Testing claw");
-        delay(5000);
-    }
+    // if (clawTest == true)
+    // {
+    //     servo1.write(0);
+    //     Serial.println("Testing claw");
+    //     delay(5000);
+    // }
 }
 
 void loop()
 {
     //steering servo test
-    resetSteering();
+    rover.turnRight();
     delay(3000);
-    turnLeft(33); //max turning angle
+    rover.turnLeft(33); //max turning angle
     delay(3000);
     // if (clawTest == true)
     // {
@@ -209,97 +196,4 @@ void loop()
     // Serial.println("--------");
     // Serial.println("");
     // delay(1000);
-}
-
-
-// functions
-
-// photoresistor logic - true = high, false = low
-bool leftPR() { return (analogRead(A0) < 960); }
-bool midPR() { return (analogRead(A1) < 900); }
-bool rightPR() { return (analogRead(A2) < 940); }
-
-// steering control - 0 to 180 degrees range
-void turnRight(int degrees)
-{
-    servo0.write(92 + degrees);
-    Serial.print("Turning right by ");
-    Serial.print(degrees);
-    Serial.print(" degrees\n");
-}
-void turnLeft(int degrees)
-{
-    servo0.write(92 - degrees);
-    Serial.print("Turning left by ");
-    Serial.print(degrees);
-    Serial.print(" degrees\n");
-}
-void resetSteering() // servo is set to 92deg for going straight, aligns better with steering system
-{
-    servo0.write(92);
-    Serial.println("Steering reset");
-}
-
-// motor control
-// speed 0 = 0%, speed 100 = 100% forward, speed -100 = 100% backwards
-void setSpeed(int speed)
-{
-    speed = speed * 1.8; // since motor is servo object, 100% = 180deg
-    motor0.write(speed);
-    Serial.print("Speed set to ");
-    Serial.print(speed);
-    Serial.print("\n");
-}
-
-// led control
-void setColor0(int R, int G, int B)
-{
-    analogWrite(RED0, R);
-    analogWrite(GREEN0, G);
-    analogWrite(BLUE0, B);
-    Serial.println("Changed indicator color");
-}
-void setColor1(int R, int G, int B)
-{
-    analogWrite(RED1, R);
-    analogWrite(GREEN1, G);
-    analogWrite(BLUE1, B);
-    Serial.println("Changed underglow color");
-}
-
-// misc 'fun'ctions
-void dance()
-{
-    int x = 30; // will run for ~30 seconds
-    rainbowLights();
-    while (x > 0)
-    {
-        turnLeft(45);
-        delay(250);
-        turnRight(45);
-        delay(250);
-        turnLeft(45);
-        delay(250);
-        turnRight(45);
-        delay(250);
-        x--;
-    }
-}
-void rainbowLights() // code from https://gist.github.com/jimsynz/766994#file-rgb_spectrum-c
-{
-    int rgbColor[3] = {255, 0, 0};
-    for (int decColor = 0; decColor < 3; decColor += 1)
-    {
-        int incColor = decColor == 2 ? 0 : decColor + 1;
-        // cross-fade the two colours.
-        for (int x = 0; x < 255; x += 1)
-        {
-            rgbColor[decColor] -= 1;
-            rgbColor[incColor] += 1;
-
-            setColor0(rgbColor[0], rgbColor[1], rgbColor[2]);
-            setColor1(rgbColor[0], rgbColor[1], rgbColor[2]);
-            delay(5);
-        }
-    }
 }
