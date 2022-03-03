@@ -4,6 +4,21 @@
 #include <Servo.h>
 #include "Rover.h"
 
+/**
+ * Rover library
+ * Methods:
+ * -----------
+ * -onLine()
+ * -turnRight()
+ * -turnLeft()
+ * -turnStraight()
+ * -motorSpeed()
+ * -clawSet()
+ * -clawSetPos()
+ * -setColor()
+ * -dance()
+ * -rainbowLights()
+**/
 Rover::Rover(
     int STEERING_SERVO,
     int CLAW_SERVO,
@@ -52,43 +67,113 @@ Rover::Rover(
     pinMode(_LED1_R, OUTPUT);
     pinMode(_LED1_G, OUTPUT);
     pinMode(_LED1_B, OUTPUT);
-}
+};
 
 // photoresistor logic - true = high, false = low
-bool Rover::() { return (analogRead(A0) < 960); }
-bool Rover::midPR() { return (analogRead(A1) < 900); }
-bool Rover::rightPR() { return (analogRead(A2) < 940); }
+/**
+ * Checks if rover is on line
+ * @param pr Photoresistor to check (int {0 = L, 1 = M, 2 = R})
+ * @returns bool - Whether or not photoresistor is on line
+**/
+bool Rover::onLine(int pr) {
+    if (pr==0) {
+        return (analogRead(_L_PHOTORESISTOR) < 960); 
+    } else if (pr==1) {
+        return (analogRead(_M_PHOTORESISTOR) < 900);
+    } else if (pr==2) {
+        return (analogRead(_R_PHOTORESISTOR) < 900);
+    } else {
+        return false
+    }
+}
 
-void Rover::turnRight(int deg) {
+/**
+*Turns rover right
+*@param degrees Amount of degrees to turn right. (int 0-33)
+**/
+void Rover::steerRight(int deg) {
+    if (deg < 0 || deg > 33) {
+        deg = deg < 0 ? 0:33
+    }
+
     _largeservo.write(92 + deg);
     Serial.print("Turning right by ");
     Serial.print(deg);
     Serial.print(" degrees\n");
-}
+};
 
-void Rover::turnLeft(int deg) {
+/**
+* Turns rover left
+* @param degrees Amount of degrees to turn left. (int 0-33)
+**/
+void Rover::steerLeft(int deg) {
+    if (deg < 0 || deg > 33) {
+        deg = deg < 0 ? 0:33
+    }
     _largeservo.write(92 - deg);
     Serial.print("Turning left by ");
     Serial.print(deg);
     Serial.print(" degrees\n");
-}
+};
 
-void Rover::turnStraight() // servo is set to 92deg for going straight, aligns better with steering system
+/**
+* Resets rover turning
+**/
+void Rover::steerStraight() // servo is set to 92deg for going straight, aligns better with steering system
 {
     _largeservo.write(92);
     Serial.println("Steering reset");
-}
+};
 
-void Rover::motorSpeed(int speed)
+/**
+* Sets motor speed
+* @param speed Percentage of maximum speed (int 0-100)
+**/
+void Rover::motorSet(int speed)
 {
     speed = speed * 1.8; // since motor is servo object, 100% = 180deg
     motor0.write(speed);
     Serial.print("Speed set to ");
     Serial.print(speed);
     Serial.print("\n");
-}
+};
 
-void Rover::setColor(int group, int R, int G, int B) 
+/**
+ * Opens/closes claw
+ * @param status Whether or not claw is open (bool)
+**/
+void Rover::clawSet(bool status) {
+    if (status){
+        Serial.print('Closing claw')
+        _smallservo.write(0)
+    } else {
+        Serial.print('Opening claw')
+        _smallservo.write(80)
+    }
+};
+
+/**
+ *  Sets claw to specific angle
+ *  @param deg Claw angle (int 0-80)
+**/
+void Rover::clawSetPos(int deg) {
+    if (deg < 0 || deg > 80) {
+        deg = deg < 0 ? 0:80
+    }
+    _smallservo.write(deg)
+    Serial.print("Setting claw to ");
+    Serial.print(deg);
+    Serial.print(" degrees\n");
+};
+
+/**
+ * Sets LED color
+ * @param group LED Light group (int {0 = Group 0, 1 = Group 1})
+ * @param R LED Red value (int 0-255)
+ * @param G LED Green value (int 0-255)
+ * @param B LED Blue value (int 0-255)
+**/
+void Rover::colorSet(int group, int R, int G, int B) 
 {
     if (group == 0) {
         analogWrite(_LED0_R, R);
@@ -101,8 +186,11 @@ void Rover::setColor(int group, int R, int G, int B)
         analogWrite(_LED1_B, B);
         Serial.println("Changed underglow color");
     }
-}
+};
 
+/**
+ * Makes rover dance
+**/
 void Rover::dance() 
 {
     int x = 30; // will run for ~30 seconds
@@ -119,8 +207,11 @@ void Rover::dance()
         delay(250);
         x--;
     }
-}
+};
 
+/**
+ * Makes rover a gamer
+**/
 void Rover::rainbowLights()
 {
     int rgbColor[3] = {255, 0, 0};
@@ -138,4 +229,4 @@ void Rover::rainbowLights()
             delay(5);
         }
     }
-}
+};

@@ -29,16 +29,16 @@ class Rover
         );
 
         //steering controls
-        void turnLeft(int degrees);
-        void turnRight(int degrees);
-        void turnStraight();
+        void steerLeft(int degrees);
+        void steerRight(int degrees);
+        void steerStraight();
 
         //claw controls
-        void clawOpen(int degrees);
-        void clawClose(int degrees);
+        void clawSet(bool status);
+        void clawSetPos(int degrees);
 
         //motor controls
-        void motorSpeed(int speed);
+        void motorSet(int speed);
 
         //photoresistor logic
         // photoresistor logic - true = high, false = low
@@ -47,7 +47,7 @@ class Rover
         bool rightPR();
 
         //led controls
-        void setColor(int group, int R, int G, int B);
+        void colorSet(int group, int R, int G, int B);
 
         //fun functions
         void dance();
