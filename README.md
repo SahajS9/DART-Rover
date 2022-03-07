@@ -11,26 +11,26 @@ TODO:
 
 Light status indication list (WIP):
  - **Red -> yellow -> green**
-  - Initializing
+      - Initializing
 
 
  - **Steady green**
-  - Turning right
+      - Turning right
 
 
  - **Steady red**
-  - Turning left
+      - Turning left
 
 
  - **Blinking blue**
-  - All three PRs have a low signal
+      - All three PRs have a low signal
 
 
  - **Blinking yellow**
-  - Off-course, all three PRs have high signal
+      - Off-course, all three PRs have high signal
 
  - **Blinking green**
-  - Found signature, switched to target locating
+      - Found signature, switched to target locating
 
  - **Off**
-  - On-course or offline, not turning
+      - On-course or offline, not turning
