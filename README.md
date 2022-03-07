@@ -10,15 +10,27 @@ TODO:
 - Asynchronous functions
 
 Light status indication list (WIP):
- - *Red -> yellow -> green*
+ - **Red -> yellow -> green**
   - Initializing
- - *Steady green*
+
+
+ - **Steady green**
   - Turning right
- - *Steady red*
+
+
+ - **Steady red**
   - Turning left
- - *Blinking blue*
+
+
+ - **Blinking blue**
   - All three PRs have a low signal
- - *Blinking yellow*
+
+
+ - **Blinking yellow**
   - Off-course, all three PRs have high signal
- - *Off*
+
+ - **Blinking green**
+  - Found signature, switched to target locating
+
+ - **Off**
   - On-course or offline, not turning
