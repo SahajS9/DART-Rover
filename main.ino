@@ -208,16 +208,16 @@ void loop()
 #pragma endregion
 
 #pragma region Signature Detection(Transition)
-rover._pixy.ccc.getBlocks();
-    if (rover._pixy.ccc.numBlocks && locatingTarget == true)
+rover.pixy.ccc.getBlocks();
+    if (rover.pixy.ccc.numBlocks && locatingTarget == true)
     {
-        for (i = 0; i < pixy.ccc.numBlocks; i++)
+        for (i = 0; i < rover.pixy.ccc.numBlocks; i++)
         {
             if (debug == true)
             {
-                pixy.ccc.blocks[i].print(); // debug print block info
+                rover.pixy.ccc.blocks[i].print(); // debug print block info
             }
-            if (pixy.ccc.blocks[i].m_height >= 10) // temporarily set as arbitrary value, needs to be whatever size is once reached end of line
+            if (rover.pixy.ccc.blocks[i].m_height >= 10) // temporarily set as arbitrary value, needs to be whatever size is once reached end of line
             {
                 Serial.println("Detected target, switching to target locating mode");
                 lineFollowing = false;
@@ -236,12 +236,12 @@ rover._pixy.ccc.getBlocks();
 #pragma region PixyCam Logic
     if (locatingTarget == true && pixy.ccc.numBlocks)
     {
-        for (i = 0; i < pixy.ccc.numBlocks; i++)
+        for (i = 0; i < rover.pixy.ccc.numBlocks; i++)
         {
             // x coord goes from 0 to 316, middle is 158, center region from 150 to 166
-            if (pixy.ccc.blocks[i].m_x < 150) // turn left until center if target is on left side
+            if (rover.pixy.ccc.blocks[i].m_x < 150) // turn left until center if target is on left side
             {
-                while (pixy.ccc.blocks[i].m_x < 150)
+                while (rover.pixy.ccc.blocks[i].m_x < 150)
                 {
                     rover.motorSet(5);
                     rover.steerLeft(5);
@@ -274,17 +274,5 @@ rover._pixy.ccc.getBlocks();
 #pragma endregion
 
     Serial.println("-------"); // indicates reached end of loop
-<<<<<<< HEAD
     Serial.println("");        // spacer
-=======
-    Serial.println("");
-    #pragma endregion
-    
-    //TODO: Add transitional logic between line follow and pixycam modes
-    
-    #pragma region PixyCam Logic
-    //TODO: PixyCam Logic
-
-    #pragma endregion
->>>>>>> e05fb70238a218da693b48f31b0860447ad35213
 }
