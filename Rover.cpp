@@ -4,6 +4,23 @@
 #include <Servo.h>
 #include "Rover.h"
 
+<<<<<<< Updated upstream
+=======
+/**
+ * Rover library
+ * @param onLine()
+ * @param steerRight()
+ * @param steerLeft()
+ * @param turnStraight()
+ * @param motorSpeed()
+ * @param clawSet()
+ * @param clawSetPos()
+ * @param setColor()
+ * @param flashColor()
+ * @param dance()
+ * @param rainbowLights()
+ **/
+>>>>>>> Stashed changes
 Rover::Rover(
     int STEERING_SERVO,
     int CLAW_SERVO,
@@ -16,8 +33,8 @@ Rover::Rover(
     int LED0_B,
     int LED1_R,
     int LED1_G,
-    int LED1_B
-) {
+    int LED1_B)
+{
     _STEERING_SERVO = STEERING_SERVO;
     _CLAW_SERVO = CLAW_SERVO;
     _MOTOR = MOTOR;
@@ -58,27 +75,37 @@ Rover::Rover(
 /**
  * Checks if photoresistor is off the line
  * @param pr Photoresistor to check (int {0 = L, 1 = M, 2 = R})
- * @returns bool - Whether or not photoresistor is off line
-**/
-bool Rover::isOffLine(int pr) {
-    if (pr==0) {
-        return (analogRead(_L_PHOTORESISTOR) < 960); 
-    } else if (pr==1) {
+ * @returns bool - Whether or not photoresistor has high or low signal
+ **/
+bool Rover::isOffLine(int pr)
+{
+    if (pr == 0)
+    {
+        return (analogRead(_L_PHOTORESISTOR) < 960);
+    }
+    else if (pr == 1)
+    {
         return (analogRead(_M_PHOTORESISTOR) < 900);
-    } else if (pr==2) {
+    }
+    else if (pr == 2)
+    {
         return (analogRead(_R_PHOTORESISTOR) < 900);
-    } else {
-        return false
+    }
+    else
+    {
+        return false;
     }
 }
 
 /**
-*Turns rover right
-*@param degrees Amount of degrees to turn right. (int 0-33)
-**/
-void Rover::steerRight(int deg) {
-    if (deg < 0 || deg > 33) {
-        deg = deg < 0 ? 0:33
+ *Turns rover right
+ *@param degrees Amount of degrees to turn right. (int 0-33)
+ **/
+void Rover::steerRight(int deg)
+{
+    if (deg < 0 || deg > 33)
+    {
+        deg = deg < 0 ? 0 : 33;
     }
 
     _largeservo.write(92 + deg);
@@ -88,12 +115,14 @@ void Rover::steerRight(int deg) {
 };
 
 /**
-* Turns rover left
-* @param degrees Amount of degrees to turn left. (int 0-33)
-**/
-void Rover::steerLeft(int deg) {
-    if (deg < 0 || deg > 33) {
-        deg = deg < 0 ? 0:33
+ * Turns rover left
+ * @param degrees Amount of degrees to turn left. (int 0-33)
+ **/
+void Rover::steerLeft(int deg)
+{
+    if (deg < 0 || deg > 33)
+    {
+        deg = deg < 0 ? 0 : 33;
     }
     _largeservo.write(92 - deg);
     Serial.print("Turning left by ");
@@ -102,8 +131,8 @@ void Rover::steerLeft(int deg) {
 };
 
 /**
-* Resets rover turning
-**/
+ * Resets rover turning
+ **/
 void Rover::steerStraight() // servo is set to 92deg for going straight, aligns better with steering system
 {
     _largeservo.write(92);
@@ -111,13 +140,13 @@ void Rover::steerStraight() // servo is set to 92deg for going straight, aligns 
 };
 
 /**
-* Sets motor speed
-* @param speed Percentage of maximum speed (int 0-100)
-**/
+ * Sets motor speed
+ * @param speed Percentage of maximum speed (int 0-100)
+ **/
 void Rover::motorSet(int speed)
 {
     speed = speed * 1.8; // since motor is servo object, 100% = 180deg
-    motor0.write(speed);
+    _motor.write(speed);
     Serial.print("Speed set to ");
     Serial.print(speed);
     Serial.print("\n");
@@ -125,27 +154,42 @@ void Rover::motorSet(int speed)
 
 /**
  * Opens/closes claw
- * @param status Whether or not claw is open (bool)
-**/
-void Rover::clawSet(bool status) {
-    if (status){
-        Serial.print('Closing claw')
-        _smallservo.write(0)
-    } else {
-        Serial.print('Opening claw')
-        _smallservo.write(80)
+ * @param status True - close; false = open
+ **/
+void Rover::clawSet(bool status)
+{
+    int pos; // temp var for storing position through loop
+    if (status)
+    {
+        Serial.print("Closing claw");
+        for (pos = 80; pos >= 0; pos -= 1)
+        {
+            _smallservo.write(pos);
+            delay(15);
+        }
+    }
+    else
+    {
+        Serial.print("Opening claw");
+        for (pos = 0; pos <= 80; pos += 1)
+        {
+            _smallservo.write(pos);
+            delay(15);
+        }
     }
 };
 
 /**
  *  Sets claw to specific angle
  *  @param deg Claw angle (int 0-80)
-**/
-void Rover::clawSetPos(int deg) {
-    if (deg < 0 || deg > 80) {
-        deg = deg < 0 ? 0:80
+ **/
+void Rover::clawSetPos(int deg)
+{
+    if (deg < 0 || deg > 80)
+    {
+        deg = deg < 0 ? 0 : 80;
     }
-    _smallservo.write(deg)
+    _smallservo.write(deg);
     Serial.print("Setting claw to ");
     Serial.print(deg);
     Serial.print(" degrees\n");
@@ -153,19 +197,22 @@ void Rover::clawSetPos(int deg) {
 
 /**
  * Sets LED color
- * @param group LED Light group (int {0 = Group 0, 1 = Group 1})
+ * @param group LED Light group (int {0 = Group 0 (indicators), 1 = Group 1 (underglow)})
  * @param R LED Red value (int 0-255)
  * @param G LED Green value (int 0-255)
  * @param B LED Blue value (int 0-255)
-**/
-void Rover::colorSet(int group, int R, int G, int B) 
+ **/
+void Rover::colorSet(int group, int R, int G, int B)
 {
-    if (group == 0) {
+    if (group == 0)
+    {
         analogWrite(_LED0_R, R);
         analogWrite(_LED0_G, G);
         analogWrite(_LED0_B, B);
         Serial.println("Changed indicator color");
-    } else if (group == 1) {
+    }
+    else if (group == 1)
+    {
         analogWrite(_LED1_R, R);
         analogWrite(_LED1_G, G);
         analogWrite(_LED1_B, B);
@@ -174,21 +221,53 @@ void Rover::colorSet(int group, int R, int G, int B)
 };
 
 /**
+ * @param group LED Light group (int {0 = Group 0, 1 = Group 1})
+ * @param R LED Red value (int 0-255)
+ * @param G LED Green value (int 0-255)
+ * @param B LED Blue value (int 0-255)
+ * @param delay delay between flashes (int 0-99999)
+ */
+void Rover::colorFlash(int group, int R, int G, int B, int delay)
+{
+    if (group == 0)
+    {
+        Serial.println("Flashing indicators");
+        analogWrite(_LED0_R, R);
+        analogWrite(_LED0_G, G);
+        analogWrite(_LED0_B, B);
+        delay(delay);
+        analogWrite(_LED0_R, 0);
+        analogWrite(_LED0_G, 0);
+        analogWrite(_LED0_B, 0);
+    }
+    else if (group == 1)
+    {
+        Serial.println("Flashing underglow");
+        analogWrite(_LED0_R, R);
+        analogWrite(_LED0_G, G);
+        analogWrite(_LED0_B, B);
+        delay(delay);
+        analogWrite(_LED0_R, 0);
+        analogWrite(_LED0_G, 0);
+        analogWrite(_LED0_B, 0);
+    }
+}
+/**
  * Makes rover dance
-**/
-void Rover::dance() 
+ **/
+void Rover::dance()
 {
     int x = 30; // will run for ~30 seconds
     rainbowLights();
     while (x > 0)
     {
-        turnLeft(45);
+        steerLeft(45);
         delay(250);
-        turnRight(45);
+        steerRight(45);
         delay(250);
-        turnLeft(45);
+        steerLeft(45);
         delay(250);
-        turnRight(45);
+        steerRight(45);
         delay(250);
         x--;
     }
@@ -196,7 +275,7 @@ void Rover::dance()
 
 /**
  * Makes rover a gamer
-**/
+ **/
 void Rover::rainbowLights()
 {
     int rgbColor[3] = {255, 0, 0};
@@ -209,8 +288,8 @@ void Rover::rainbowLights()
             rgbColor[decColor] -= 1;
             rgbColor[incColor] += 1;
 
-            Rover::setColor(0, rgbColor[0], rgbColor[1], rgbColor[2]);
-            Rover::setColor(1, rgbColor[0], rgbColor[1], rgbColor[2]);
+            Rover::colorSet(0, rgbColor[0], rgbColor[1], rgbColor[2]);
+            Rover::colorSet(1, rgbColor[0], rgbColor[1], rgbColor[2]);
             delay(5);
         }
     }

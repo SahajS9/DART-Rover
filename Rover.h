@@ -58,6 +58,7 @@ class Rover
         bool isOffLine(int pr);
         //led controls
         void colorSet(int group, int R, int G, int B);
+        void colorFlash(int group, int R, int G, int B, int delay);
 
         //fun functions
         void dance();
