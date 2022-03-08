@@ -45,7 +45,7 @@ Rover::Rover(
     _LED1_G = LED1_G;
     _LED1_B = LED1_B;
 
-    Pixy2 _pixy;
+    Pixy2 pixy;
     Servo _largeservo;
     Servo _smallservo;
     Servo _motor;

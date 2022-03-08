@@ -63,6 +63,9 @@ class Rover
         //fun functions
         void dance();
         void rainbowLights();
+
+        //Pixy object
+        Pixy2 pixy;
     
     private:
         int _STEERING_SERVO;
@@ -81,7 +84,6 @@ class Rover
         int _LED1_G;
         int _LED1_B;
 
-        Pixy2 _pixy;
         Servo _largeservo;
         Servo _smallservo;
         Servo _motor;

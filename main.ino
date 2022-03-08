@@ -274,5 +274,17 @@ rover._pixy.ccc.getBlocks();
 #pragma endregion
 
     Serial.println("-------"); // indicates reached end of loop
+<<<<<<< HEAD
     Serial.println("");        // spacer
+=======
+    Serial.println("");
+    #pragma endregion
+    
+    //TODO: Add transitional logic between line follow and pixycam modes
+    
+    #pragma region PixyCam Logic
+    //TODO: PixyCam Logic
+
+    #pragma endregion
+>>>>>>> e05fb70238a218da693b48f31b0860447ad35213
 }
