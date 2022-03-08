@@ -234,7 +234,7 @@ rover.pixy.ccc.getBlocks();
 #pragma endregion
 
 #pragma region PixyCam Logic
-    if (locatingTarget == true && pixy.ccc.numBlocks)
+    if (locatingTarget == true && rover.pixy.ccc.numBlocks)
     {
         for (i = 0; i < rover.pixy.ccc.numBlocks; i++)
         {
@@ -247,9 +247,9 @@ rover.pixy.ccc.getBlocks();
                     rover.steerLeft(5);
                 }
             }
-            else if (pixy.ccc.blocks[i].m_x > 166) // turn right until center if target is on right side
+            else if (rover.pixy.ccc.blocks[i].m_x > 166) // turn right until center if target is on right side
             {
-                while (pixy.ccc.blocks[i].m_x > 166)
+                while (rover.pixy.ccc.blocks[i].m_x > 166)
                 {
                     rover.motorSet(5);
                     rover.steerRight(5);
@@ -261,7 +261,7 @@ rover.pixy.ccc.getBlocks();
                 rover.steerStraight();
 
             }
-            if (pixy.ccc.blocks[i].m_height >= 100) // once close enough, stop and grab it
+            if (rover.pixy.ccc.blocks[i].m_height >= 100) // once close enough, stop and grab it
             {
                 Serial.println("Target is within reach, grabbing");
                 rover.motorSet(0);
