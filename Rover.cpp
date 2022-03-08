@@ -4,8 +4,6 @@
 #include <Servo.h>
 #include "Rover.h"
 
-<<<<<<< Updated upstream
-=======
 /**
  * Rover library
  * @param onLine()
@@ -20,7 +18,6 @@
  * @param dance()
  * @param rainbowLights()
  **/
->>>>>>> Stashed changes
 Rover::Rover(
     int STEERING_SERVO,
     int CLAW_SERVO,

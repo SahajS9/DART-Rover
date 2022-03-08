@@ -56,9 +56,6 @@ bool finished = false;
 bool lineFollowing = true;
 bool locatingTarget = false;
 char lastLineLocation = ' '; // L = left, R = right
-int photoresistor0;
-int photoresistor1;
-int photoresistor2;
 
 void setup()
 {
@@ -211,8 +208,8 @@ void loop()
 #pragma endregion
 
 #pragma region Signature Detection(Transition)
-    pixy.ccc.getBlocks();
-    if (pixy.ccc.numBlocks && locatingTarget == true)
+rover._pixy.ccc.getBlocks();
+    if (rover._pixy.ccc.numBlocks && locatingTarget == true)
     {
         for (i = 0; i < pixy.ccc.numBlocks; i++)
         {
@@ -237,7 +234,7 @@ void loop()
 #pragma endregion
 
 #pragma region PixyCam Logic
-    if (locatingTarget == true && pixy.ccc.numBlocks &&)
+    if (locatingTarget == true && pixy.ccc.numBlocks)
     {
         for (i = 0; i < pixy.ccc.numBlocks; i++)
         {
