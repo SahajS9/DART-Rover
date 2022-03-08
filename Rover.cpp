@@ -4,19 +4,6 @@
 #include <Servo.h>
 #include "Rover.h"
 
-/**
- * Rover library
- * @param onLine()
- * @param turnRight()
- * @param turnLeft()
- * @param turnStraight()
- * @param motorSpeed()
- * @param clawSet()
- * @param clawSetPos()
- * @param setColor()
- * @param dance()
- * @param rainbowLights()
-**/
 Rover::Rover(
     int STEERING_SERVO,
     int CLAW_SERVO,
