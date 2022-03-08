@@ -30,9 +30,9 @@ class Rover
             int STEERING_SERVO,
             int CLAW_SERVO,
             int MOTOR,
-            String L_PHOTORESISTOR,
-            String R_PHOTORESISTOR,
-            String M_PHOTORESISTOR,
+            uint8_t L_PHOTORESISTOR,
+            uint8_t R_PHOTORESISTOR,
+            uint8_t M_PHOTORESISTOR,
             int LED0_R,
             int LED0_G,
             int LED0_B,
@@ -40,6 +40,8 @@ class Rover
             int LED1_G,
             int LED1_B
         );
+
+        void begin();
 
         //steering controls
         void steerLeft(int degrees);
@@ -72,9 +74,9 @@ class Rover
         int _CLAW_SERVO;
         int _MOTOR;
 
-        int _L_PHOTORESISTOR;
-        int _R_PHOTORESISTOR;
-        int _M_PHOTORESISTOR;
+        uint8_t _L_PHOTORESISTOR;
+        uint8_t _R_PHOTORESISTOR;
+        uint8_t _M_PHOTORESISTOR;
 
         int _LED0_R;
         int _LED0_G;

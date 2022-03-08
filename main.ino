@@ -9,35 +9,35 @@
 #include "Rover.h"
 
 // pin definitions
-#define STEERING 3
-#define CLAW 2
-#define MOTOR 4
+const int STEERING_SERVO = 3;
+const int CLAW_SERVO = 2;
+const int MOTOR = 4;
 
-#define L_PHOTORESISTOR A0
-#define M_PHOTORESISTOR A1
-#define R_PHOTORESISTOR A2
+const uint8_t L_PHOTORESISTOR = A0;
+const uint8_t M_PHOTORESISTOR = A1;
+const uint8_t R_PHOTORESISTOR = A2;
 
-#define LED0_R 10
-#define LED0_G 9
-#define LED0_B 8
+const int LED0_R = 10;
+const int LED0_G = 9;
+const int LED0_B = 8;
 
-#define LED1_R 7
-#define LED1_G 6
-#define LED1_B 5
+const int LED1_R = 7;
+const int LED1_G = 6;
+const int LED1_B = 5;
 
 Rover rover(
-    int STEERING_SERVO,
-    int CLAW_SERVO,
-    int MOTOR,
-    String L_PHOTORESISTOR,
-    String R_PHOTORESISTOR,
-    String M_PHOTORESISTOR,
-    int LED0_R,
-    int LED0_G,
-    int LED0_B,
-    int LED1_R,
-    int LED1_G,
-    int LED1_B);
+    STEERING_SERVO,
+    CLAW_SERVO,
+    MOTOR,
+    L_PHOTORESISTOR,
+    R_PHOTORESISTOR,
+    M_PHOTORESISTOR,
+    LED0_R,
+    LED0_G,
+    LED0_B,
+    LED1_R,
+    LED1_G,
+    LED1_B);
 
 // debug mode
 bool debug = false;
@@ -59,6 +59,7 @@ char lastLineLocation = ' '; // L = left, R = right
 
 void setup()
 {
+    rover.begin();
     rover.steerStraight();
     Serial.begin(115200); // baud rate for serial monitor
     Serial.println("Starting in 3 seconds");

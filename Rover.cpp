@@ -22,9 +22,9 @@ Rover::Rover(
     int STEERING_SERVO,
     int CLAW_SERVO,
     int MOTOR,
-    int L_PHOTORESISTOR,
-    int R_PHOTORESISTOR,
-    int M_PHOTORESISTOR,
+    uint8_t L_PHOTORESISTOR,
+    uint8_t R_PHOTORESISTOR,
+    uint8_t M_PHOTORESISTOR,
     int LED0_R,
     int LED0_G,
     int LED0_B,
@@ -49,15 +49,18 @@ Rover::Rover(
     Servo _largeservo;
     Servo _smallservo;
     Servo _motor;
+};
 
+void Rover::begin()
+{
     // pin attachments
     _largeservo.attach(_STEERING_SERVO);
     _smallservo.attach(_CLAW_SERVO);
     _motor.attach(_MOTOR);
 
     // pixy cam
-    _pixy.init();
-    _pixy.changeProg("ccc");
+    pixy.init();
+    pixy.changeProg("ccc");
     // leds - red blue green, left (cathode) middle right
     // function uses standard RGB format
     pinMode(_LED0_R, OUTPUT);
@@ -67,7 +70,6 @@ Rover::Rover(
     pinMode(_LED1_G, OUTPUT);
     pinMode(_LED1_B, OUTPUT);
 };
-
 // photoresistor logic - true = high, false = low
 /**
  * Checks if photoresistor is off the line
@@ -78,20 +80,23 @@ bool Rover::isOffLine(int pr)
 {
     if (pr == 0)
     {
-        return (analogRead(_L_PHOTORESISTOR) < 960);
+        return (analogRead(_L_PHOTORESISTOR) < 500);
     }
     else if (pr == 1)
     {
-        return (analogRead(_M_PHOTORESISTOR) < 900);
+        return (analogRead(_M_PHOTORESISTOR) < 300);
     }
     else if (pr == 2)
     {
-        return (analogRead(_R_PHOTORESISTOR) < 900);
+        return (analogRead(_R_PHOTORESISTOR) < 350);
     }
     else
     {
         return false;
     }
+    
+    //SHARPIE LINE = L560 M370 R420
+    //PRINTER PAPER = L300 M200 R270
 }
 
 /**
@@ -138,11 +143,11 @@ void Rover::steerStraight() // servo is set to 92deg for going straight, aligns 
 
 /**
  * Sets motor speed
- * @param speed Percentage of maximum speed (int 0-100)
+ * @param speed Percentage of maximum speed (int -100-100)
  **/
 void Rover::motorSet(int speed)
 {
-    speed = speed * 1.8; // since motor is servo object, 100% = 180deg
+    speed = (speed * 0.9) + 90;
     _motor.write(speed);
     Serial.print("Speed set to ");
     Serial.print(speed);
@@ -224,7 +229,7 @@ void Rover::colorSet(int group, int R, int G, int B)
  * @param B LED Blue value (int 0-255)
  * @param delay delay between flashes (int 0-99999)
  */
-void Rover::colorFlash(int group, int R, int G, int B, int delay)
+void Rover::colorFlash(int group, int R, int G, int B, int del)
 {
     if (group == 0)
     {
@@ -232,7 +237,7 @@ void Rover::colorFlash(int group, int R, int G, int B, int delay)
         analogWrite(_LED0_R, R);
         analogWrite(_LED0_G, G);
         analogWrite(_LED0_B, B);
-        delay(delay);
+        delay(del);
         analogWrite(_LED0_R, 0);
         analogWrite(_LED0_G, 0);
         analogWrite(_LED0_B, 0);
@@ -243,7 +248,7 @@ void Rover::colorFlash(int group, int R, int G, int B, int delay)
         analogWrite(_LED0_R, R);
         analogWrite(_LED0_G, G);
         analogWrite(_LED0_B, B);
-        delay(delay);
+        delay(del);
         analogWrite(_LED0_R, 0);
         analogWrite(_LED0_G, 0);
         analogWrite(_LED0_B, 0);
