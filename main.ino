@@ -58,6 +58,7 @@ int i;
 bool finished = false;
 bool lineFollowing = true;
 bool locatingTarget = false;
+bool alignedWithTarget = false;
 char lastLineLocation = ' '; // L = left, R = right
 
 void setup()
@@ -255,6 +256,7 @@ void loop()
                 {
                     rover.motorSet(5);
                     rover.steerLeft(5);
+                    Serial.println("Turning left to align to target");
                 }
             }
             else if (rover.pixy.ccc.blocks[i].m_x > 166) // turn right until center if target is on right side
@@ -263,14 +265,17 @@ void loop()
                 {
                     rover.motorSet(5);
                     rover.steerRight(5);
+                    Serial.println("Turning right to align to target");
                 }
             }
             else
             {
                 rover.motorSet(5);
                 rover.steerStraight();
+                alignedWithTarget = true;
+                Serial.println("Aligned with target");
             }
-            if (rover.pixy.ccc.blocks[i].m_height >= 100) // once close enough, stop and grab it
+            if (rover.pixy.ccc.blocks[i].m_height >= 100 && ) // once close enough, stop and grab it
             {
                 Serial.println("Target is within reach, grabbing");
                 rover.motorSet(0);
