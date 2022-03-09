@@ -28,5 +28,8 @@ Light status indication list (WIP):
  - **Blinking green**
       - Found signature, switched to target locating
 
+ - **Green -> magenta -> green**
+      - Target within reach, grabbing
+
  - **Off**
       - On-course or offline, not turning
