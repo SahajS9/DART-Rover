@@ -275,7 +275,7 @@ void loop()
                 alignedWithTarget = true;
                 Serial.println("Aligned with target");
             }
-            if (rover.pixy.ccc.blocks[i].m_height >= 100 && ) // once close enough, stop and grab it
+            if (rover.pixy.ccc.blocks[i].m_height >= 100 && alignedWithTarget == true) // once close enough, stop and grab it
             {
                 Serial.println("Target is within reach, grabbing");
                 rover.motorSet(0);
