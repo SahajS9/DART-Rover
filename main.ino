@@ -2,6 +2,8 @@
 // author: Sage, co-author: Aaron
 // pin variables are in all CAPS, other variables are lowerCamelCase; and vars are zero-based indexed (starting from 0)
 // gets llbrary built for this project from Rover.h, which will get its functions from Rover.cpp
+// led group 0 is the indicators, group 1 is the underglow
+// we use aircraft standards to indicate the direction of turn (i.e. red = left, green = right)
 
 #include <SPI.h>
 #include <Pixy2.h>
@@ -48,6 +50,7 @@ const int red[3] = {255, 0, 0};
 const int green[3] = {0, 255, 0};
 const int blue[3] = {0, 0, 255};
 const int yellow[3] = {255, 180, 0};
+const int magenta[3] = {255, 0, 255};
 const int off[3] = {0, 0, 0};
 
 // misc for logics
@@ -63,14 +66,18 @@ void setup()
     rover.steerStraight();
     Serial.begin(115200); // baud rate for serial monitor
     Serial.println("Starting in 3 seconds");
+    rover.pixy.setLamp(0, 0); // turns off Pixy lamps, not needed yet
+    rover.pixy.setLED(off[0], off[1], off[2]);
+    rover.clawSet(true); // closes claw
     // start-up lights
-    rover.colorSet(1, red[0], red[1], red[2]);
+    rover.colorSet(0, red[0], red[1], red[2]);
     delay(1000);
-    rover.colorSet(1, yellow[0], yellow[1], yellow[2]);
+    rover.colorSet(0, yellow[0], yellow[1], yellow[2]);
     delay(1000);
-    rover.colorSet(1, green[0], green[1], green[2]);
+    rover.colorSet(0, green[0], green[1], green[2]);
     delay(1000);
-    // delay(3000); // change to 10 seconds once testing on track
+    delay(2000); // uncomment this line to make 5 seconds of delay once testing on track
+    rover.colorSet(0, off[0], off[1], off[2]);
     Serial.print("Engaging line following mode (Startup)\n");
     rover.colorSet(1, white[0], white[1], white[2]); // turn on floor-facing lights, set to white
 }
@@ -83,10 +90,10 @@ void loop()
     {
         for (int stopped = 0; i <= 0; i++)
         {
-            Serial.println("Finished, engaing celebratory measures");
             rover.colorSet(1, off[0], off[1], off[2]); // floor lights off
             rover.motorSet(0);
             rover.steerStraight();
+            Serial.println("Finished, engaging celebratory measures");
             stopped = 1; // == true
             delay(3000);
             // rover.dance();
@@ -98,7 +105,7 @@ void loop()
 #pragma region Line Follow Logic
     if (lineFollowing == true)
     {
-        // All photoresistors on the line
+        // All photoresistors below threshold
         while (rover.isOffLine(0) == false && rover.isOffLine(2) == false && rover.isOffLine(1) == false)
         {
             Serial.println("All PRs have low signal: Undefined state");
@@ -115,7 +122,7 @@ void loop()
 
         // All photoresistors off line
         // if all 3 PRs are high, rover is completely off-track, try and find it again based on which side the line was; assumed rover was on line at some point
-        if (rover.isOffLine(0) == true && rover.isOffLine(2) == true && rover.isOffLine(1) == true)
+        if (rover.isOffLine(0) == true && rover.isOffLine(1) == true && rover.isOffLine(2) == true)
         {
             rover.motorSet(0);
             rover.steerStraight();
@@ -127,6 +134,16 @@ void loop()
             rover.colorFlash(0, yellow[0], yellow[1], yellow[2], 250);
             delay(250);
             delay(1000); //  delay, then lights off, then action
+            if (lastLineLocation == 'L')
+            {
+                rover.colorSet(0, red[0], red[1], red[2]);
+                rover.steerLeft(5);
+                rover.motorSet(10);
+                while (rover.isOffLine(0) == true && rover.isOffLine(1) == true && rover.isOffLine(2) == true)
+                {
+                    delay(100);
+                }
+            }
             if (lastLineLocation == 'R')
             {
                 rover.colorSet(0, green[0], green[1], green[2]);
@@ -137,26 +154,16 @@ void loop()
                     delay(100);
                 }
             }
-            if (lastLineLocation == 'L')
-            {
-                rover.colorSet(0, red[0], red[1], red[2]);
-                rover.steerLeft(5);
-                rover.motorSet(10);
-                while (rover.isOffLine(0) == true && rover.isOffLine(2) == true && rover.isOffLine(1) == true)
-                {
-                    delay(100);
-                }
-            }
             rover.steerStraight();
-            return;
+            return; // exit loop here
         }
 
         // Left PR on line, turning left
         if (rover.isOffLine(0) == false)
         {
-            rover.colorSet(0, red[0], red[1], red[2]); // using aircraft standards to indicate direction of turn
+            rover.colorSet(0, red[0], red[1], red[2]);
             Serial.println("Low signal on left side");
-            rover.motorSet(10);
+            rover.motorSet(5);
             rover.steerLeft(5);
             delay(100);
             lastLineLocation = 'L';
@@ -167,7 +174,7 @@ void loop()
         {
             rover.colorSet(0, green[0], green[1], green[2]);
             Serial.println("Low signal on right side");
-            rover.motorSet(10);
+            rover.motorSet(5);
             rover.steerRight(5);
             delay(100);
             lastLineLocation = 'R';
@@ -189,9 +196,9 @@ void loop()
         }
 
         // Rover on track, mantain course
-        if (rover.isOffLine(1) == false && (rover.isOffLine(2) == true && rover.isOffLine(0) == true))
+        if (rover.isOffLine(1) == false && (rover.isOffLine(0) == true && rover.isOffLine(2) == true))
         {
-            rover.motorSet(20);
+            rover.motorSet(10);
             rover.steerStraight();
             rover.colorSet(0, off[0], off[1], off[2]);
             while (rover.isOffLine(1) == false && (rover.isOffLine(2) == true && rover.isOffLine(0) == true))
@@ -209,8 +216,8 @@ void loop()
 #pragma endregion
 
 #pragma region Signature Detection(Transition)
-rover.pixy.ccc.getBlocks();
-    if (rover.pixy.ccc.numBlocks && locatingTarget == true)
+    rover.pixy.ccc.getBlocks();
+    if (rover.pixy.ccc.numBlocks && locatingTarget == false)
     {
         for (i = 0; i < rover.pixy.ccc.numBlocks; i++)
         {
@@ -218,17 +225,19 @@ rover.pixy.ccc.getBlocks();
             {
                 rover.pixy.ccc.blocks[i].print(); // debug print block info
             }
-            if (rover.pixy.ccc.blocks[i].m_height >= 10) // temporarily set as arbitrary value, needs to be whatever size is once reached end of line
+            if (rover.pixy.ccc.blocks[i].m_height >= 10) // temporarily set as an arbitrary value, needs to be whatever size is once reached end of line, this is to avoid false positives
             {
                 Serial.println("Detected target, switching to target locating mode");
                 lineFollowing = false;
                 locatingTarget = true;
                 rover.clawSet(false); // opens claw for grabbing target
-                rover.colorFlash(0, green[0], green[1], green[2], 250);
-                delay(250);
-                rover.colorFlash(0, green[0], green[1], green[2], 250);
-                delay(250);
-                rover.colorFlash(0, green[0], green[1], green[2], 250);
+                rover.colorFlash(0, green[0], green[1], green[2], 125);
+                delay(125);
+                rover.colorFlash(0, green[0], green[1], green[2], 125);
+                delay(125);
+                rover.colorFlash(0, green[0], green[1], green[2], 125);
+                rover.pixy.setLED(yellow[0], yellow[1], yellow[2]); // sets camera lower lamp to yellow
+                rover.pixy.setLamp(1, 1);                           // turns on upper lamps for camera
             }
         }
     }
@@ -256,11 +265,10 @@ rover.pixy.ccc.getBlocks();
                     rover.steerRight(5);
                 }
             }
-            else 
+            else
             {
                 rover.motorSet(5);
                 rover.steerStraight();
-
             }
             if (rover.pixy.ccc.blocks[i].m_height >= 100) // once close enough, stop and grab it
             {
@@ -268,7 +276,13 @@ rover.pixy.ccc.getBlocks();
                 rover.motorSet(0);
                 delay(100);
                 rover.colorSet(0, green[0], green[1], green[2]);
+                delay(125);
+                rover.colorSet(0, magenta[0], magenta[1], magenta[2]);
+                delay(125);
+                rover.colorSet(0, green[0], green[1], green[2]);
+                rover.pixy.setLED(green[0], green[1], green[2]);
                 rover.clawSet(true);
+                delay(100);
             }
         }
     }
