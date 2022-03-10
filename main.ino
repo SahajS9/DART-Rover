@@ -71,7 +71,7 @@ bool alignedWithTarget = false;
 char lastLineLocation = ' ';        // L = left, R = right | memory to remember where line was if lost
 const int slowSpeed = 40;           // min > 30(?)
 const int turnRadius1 = 12;         // smaller turn radius
-const int turnRadius2 = 14;         // larger turn radius
+const int turnRadius2 = 25;         // larger turn radius
 const int timeUntilOffTrack = 1000; // time until all PRs being high to think line has stopped
 
 void setup()
@@ -130,11 +130,19 @@ void loop()
 #pragma endregion
 
 #pragma region Line Follow Logic
+    // case 0 = All white
+    // case 1 = All black
+    // case 2 = Maintain course
+    // case 3 = Left Small
+    // case 4 = Left Big
+    // case 5 = Right Small
+    // case 6 = Right Big
     if (lineFollowing == true)
     {
-        // Rover on track, mantain course
-        while (rover.isOffLine(0) == true && rover.isOffLine(1) == false && rover.isOffLine(2) == true)
+        switch (rover.isOffLine())
         {
+        case 2:
+        // Rover on track, maintain course
             if (turningStraight == false)
             {
                 rover.motorSet(slowSpeed);
@@ -145,12 +153,11 @@ void loop()
                 turningLeft = false;
                 turningRight = false;
             }
-        }
+            break;
 
-        // when starting to veer off, but not nearly completely off yet
+        // case 3 and 5 is when starting to veer off, but not nearly completely off yet
+        case 3:
         // if middle PR and left PR gets high signal
-        while (rover.isOffLine(0) == false && rover.isOffLine(1) == false && rover.isOffLine(2) == true)
-        {
             if (turningLeft == false)
             {
                 rover.steerLeft(turnRadius1);
@@ -163,10 +170,8 @@ void loop()
                 turningLeftMore = false;
                 turningRightMore = false;
             }
-        }
         // if middle PR and right PR gets high signal
-        while (rover.isOffLine(0) == true && rover.isOffLine(1) == false && rover.isOffLine(2) == false)
-        {
+        case 5:
             if (turningRight == false)
             {
                 rover.steerRight(turnRadius1);
@@ -179,12 +184,11 @@ void loop()
                 turningLeftMore = false;
                 turningRightMore = false;
             }
-        }
+            break;
 
+        // case 4 and 6 is used when track veered more than above could account for
+        case 4:
         // only Left PR on line, turning left
-        // this means track veered more than above could account for
-        while (rover.isOffLine(0) == false && rover.isOffLine(1) == true && rover.isOffLine(2) == true)
-        {
             if (turningLeftMore == false)
             {
                 rover.motorSet(slowSpeed);
@@ -198,11 +202,9 @@ void loop()
                 turningLeftMore = true;
                 turningRightMore = false;
             }
-        }
-        // only right PR on line, turning right
-        // this means track veered more than above could account for
-        while (rover.isOffLine(0) == true && rover.isOffLine(1) == true && rover.isOffLine(2) == false)
-        {
+            break;
+        case 6:
+            // only right PR on line, turning right
             if (turningRightMore == false)
             {
                 rover.motorSet(slowSpeed);
@@ -216,16 +218,14 @@ void loop()
                 turningLeftMore = false;
                 turningRightMore = true;
             }
-        }
+            break;
 
         // All photoresistors above threshold (off line)
         // if all 3 PRs are high, rover is completely off-track, try and find it again based on which side the line was; assumed rover was on line at some point
-        if (rover.isOffLine(0) == true && rover.isOffLine(1) == true && rover.isOffLine(2) == true)
-        {
+        case 0:
             timer++; // counts up each loop so if rover off track for more than one second, stop
             delay(1);
-            if (timer > timeUntilOffTrack)
-            {
+            if (timer > timeUntilOffTrack) {
                 timer = 0;
                 offTrack = true;
                 rover.motorSet(0);
@@ -240,17 +240,14 @@ void loop()
                 delay(125);
                 rover.colorFlash(0, yellow[0], yellow[1], yellow[2], 125);
                 delay(125);
+            } else {
+                timer = 0; // resets timer if back on line or some other condition
             }
-        }
-        else
-        {
-            timer = 0; // resets timer if back on line or some other condition
-        }
+            break;
 
         // All photoresistors below threshold
         // this case and two side PRs being dark is also possible, but it doesn't really matter (yet) (tm)
-        while (rover.isOffLine(0) == false && rover.isOffLine(2) == false && rover.isOffLine(1) == false)
-        {
+        case 1:
             Serial.println("All PRs have low signal, stopping");
             rover.motorSet(0);
             rover.steerStraight();
@@ -260,10 +257,11 @@ void loop()
             delay(125);
             rover.colorFlash(0, blue[0], blue[1], blue[2], 125);
             delay(125);
-            return;
+            break;
         }
     }
 #pragma endregion
+
 
     // exits loop early because cup has already been picked up if this is true
     if (finished1 == true)
@@ -271,16 +269,16 @@ void loop()
         return;
     }
 
+
 #pragma region Signature Detection(Transition)
     if (locatingTarget == false && offTrack == true)
     {
-        // Serial.println("Checking for signatures");
         rover.pixy.ccc.getBlocks();
         if (!rover.pixy.ccc.numBlocks)
         {
             return; // exits loop here if no blocks detected, else continues
         }
-        if (!(rover.isOffLine(0) == true && rover.isOffLine(1) == true && rover.isOffLine(2) == true))
+        if (!rover.isOffLine() == 0)
         {
             Serial.println("Detected signature, but not off the line yet");
             return;
@@ -304,6 +302,7 @@ void loop()
         }
     }
 #pragma endregion
+
 
 #pragma region PixyCam Logic
     if (locatingTarget == true)
@@ -365,7 +364,4 @@ void loop()
         }
     }
 #pragma endregion
-
-    // Serial.println("-------"); // indicates reached end of loop
-    // Serial.println("");        // spacer
 }

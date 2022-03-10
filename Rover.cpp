@@ -83,38 +83,96 @@ void Rover::begin()
  * @param pr Photoresistor to check (int {0 = L, 1 = M, 2 = R})
  * @returns bool - Whether or not photoresistor has high or low signal
  **/
-bool Rover::isOffLine(int pr)
+int Rover::isOffLine()
 {
-    if (pr == 0)
-    {
-        static int L = 0;
-        int L_raw = analogRead(_L_PHOTORESISTOR);
-        L = ((L * 3) + L_raw) / 4;
-        return (analogRead(_L_PHOTORESISTOR) < 400);
-    }
-    else if (pr == 1)
-    {
-        static int M = 0;
-        int M_raw = analogRead(_M_PHOTORESISTOR);
-        M = ((M * 3) + M_raw) / 4;
-        return (analogRead(_M_PHOTORESISTOR) < 300);
-    }
-    else if (pr == 2)
-    {
-        static int R = 0;
-        int R_raw = analogRead(_R_PHOTORESISTOR);
-        R = ((R * 3) + R_raw) / 4;
-        return (analogRead(_R_PHOTORESISTOR) < 400);
-    }
-    else
-    {
-        return false;
+    static int L = 0;
+    int L_raw = analogRead(_L_PHOTORESISTOR);
+    L = ((L * 3) + L_raw) / 4;
+
+    static int M = 0;
+    int M_raw = analogRead(_M_PHOTORESISTOR);
+    M = ((M * 3) + M_raw) / 4;
+    
+    static int R = 0;
+    int R_raw = analogRead(_R_PHOTORESISTOR);
+    R = ((R * 3) + R_raw) / 4;
+
+    //Condition 0 = white
+    //Condition 1 = grey
+    //Condition 2 = black
+    int L_condition;
+    int M_condition;
+    int R_condition;
+
+    if (L <= 190) {
+        L_condition = 0
+    } else if (L > 190 && L <= 210) {
+        L_condition = 1
+    } else if (L > 210) {
+        L_condition = 2
     }
 
-    // SHARPIE LINE = L560 M370 R420
-    // PRINTER PAPER = L300 M200 R270
-    // TRACK = L500 M400 R350
-    // BRANDYWINE @ 6:30 = 700 300 550
+    if (M <= 170) {
+        M_condition = 0
+    } else if (M > 170 && M <= 320) {
+        M_condition = 1
+    } else if (M > 320) {
+        M_condition = 2
+    }
+
+    if (R <= 180) {
+        R_condition = 0
+    } else if (R > 180 && R <= 240) {
+        R_condition = 1
+    } else if (R > 240) {
+        R_condition = 2
+    }
+
+    // case 0 = All white
+    // case 1 = All black
+    // case 2 = Maintain course
+    // case 3 = Left Small
+    // case 4 = Left Big
+    // case 5 = Right Small
+    // case 6 = Right Big
+
+    if ( //All white
+        L_condition == 0 &&
+        M_condition == 0 &&
+        R_condition == 0
+    ) {return 0;} 
+    else if ( //Maintain course
+        L_condition == 0 &&
+        M_condition != 0 &&
+        R_condition == 0
+    ) {return 2;}
+    else if ( //Left Small
+        L_condition == 0 &&
+        M_condition == 1 &&
+        R_condition != 0
+    ) {return 3;}
+    else if ( //Left Big
+        L_condition == 0 &&
+        M_condition == 0 &&
+        R_condition != 1
+    ) {return 4;}
+    else if ( //Right Small
+        L_condition != 0 &&
+        M_condition == 1 &&
+        R_condition == 0
+    ) {return 5;}
+    else if ( //Right Big
+        L_condition == 0 &&
+        M_condition == 0 &&
+        R_condition != 1
+    ) {return 6;}
+    else if ( //All black (error)
+        L_condition != 0 &&
+        M_condition != 0 &&
+        R_condition != 0
+    ) {return 1;}
+    else {return 1;}
+
 }
 #pragma endregion
 
