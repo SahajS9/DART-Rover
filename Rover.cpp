@@ -4,6 +4,10 @@
 #include <Servo.h>
 #include "Rover.h"
 
+// steering constant as calibrated to be cardinal and centered
+const int steeringAlignment = 92;
+
+#pragma region Init
 /**
  * Rover library
  * @param onLine()
@@ -70,6 +74,9 @@ void Rover::begin()
     pinMode(_LED1_G, OUTPUT);
     pinMode(_LED1_B, OUTPUT);
 };
+#pragma endregion
+
+#pragma region Photoresistors
 // photoresistor logic - true = high, false = low
 /**
  * Checks if photoresistor is off the line
@@ -80,7 +87,7 @@ bool Rover::isOffLine(int pr)
 {
     if (pr == 0)
     {
-        return (analogRead(_L_PHOTORESISTOR) < 500);
+        return (analogRead(_L_PHOTORESISTOR) < 700);
     }
     else if (pr == 1)
     {
@@ -88,17 +95,21 @@ bool Rover::isOffLine(int pr)
     }
     else if (pr == 2)
     {
-        return (analogRead(_R_PHOTORESISTOR) < 350);
+        return (analogRead(_R_PHOTORESISTOR) < 550);
     }
     else
     {
         return false;
     }
-    
-    //SHARPIE LINE = L560 M370 R420
-    //PRINTER PAPER = L300 M200 R270
-}
 
+    // SHARPIE LINE = L560 M370 R420
+    // PRINTER PAPER = L300 M200 R270
+    // TRACK = L450 M250 R400
+    // BRANDYWINE @ 6:30 = 700 300 550
+}
+#pragma endregion
+
+#pragma region Steering
 /**
  *Turns rover right
  *@param degrees Amount of degrees to turn right. (int 0-33)
@@ -110,7 +121,7 @@ void Rover::steerRight(int deg)
         deg = deg < 0 ? 0 : 33;
     }
 
-    _largeservo.write(92 + deg);
+    _largeservo.write(steeringAlignment + deg);
     Serial.print("Turning right by ");
     Serial.print(deg);
     Serial.print(" degrees\n");
@@ -126,7 +137,7 @@ void Rover::steerLeft(int deg)
     {
         deg = deg < 0 ? 0 : 33;
     }
-    _largeservo.write(92 - deg);
+    _largeservo.write(steeringAlignment - deg);
     Serial.print("Turning left by ");
     Serial.print(deg);
     Serial.print(" degrees\n");
@@ -135,12 +146,14 @@ void Rover::steerLeft(int deg)
 /**
  * Resets rover turning
  **/
-void Rover::steerStraight() // servo is set to 92deg for going straight, aligns better with steering system
+void Rover::steerStraight() // servo is set to steeringAlignment for going straight, aligns better with steering system
 {
-    _largeservo.write(92);
+    _largeservo.write(steeringAlignment);
     Serial.println("Steering reset");
 };
+#pragma endregion
 
+#pragma region Motor
 /**
  * Sets motor speed
  * @param speed Percentage of maximum speed (int -100-100)
@@ -153,30 +166,32 @@ void Rover::motorSet(int speed)
     Serial.print(speed);
     Serial.print("\n");
 };
+#pragma endregion
 
+#pragma region Claw
 /**
- * Opens/closes claw
- * @param status True - close; false = open
+ * Opens/closes claw | 0deg/80deg
+ * @param status True - open; false = close
  **/
 void Rover::clawSet(bool status)
 {
     int pos; // temp var for storing position through loop
     if (status)
     {
-        Serial.print("Closing claw");
-        for (pos = 80; pos >= 0; pos -= 1)
+        Serial.print("Opening claw");
+        for (pos = 50; pos >= 0; pos -= 1)
         {
             _smallservo.write(pos);
-            delay(15);
+            delay(30);
         }
     }
     else
     {
-        Serial.print("Opening claw");
+        Serial.print("Closing claw");
         for (pos = 0; pos <= 80; pos += 1)
         {
             _smallservo.write(pos);
-            delay(15);
+            delay(30);
         }
     }
 };
@@ -196,7 +211,9 @@ void Rover::clawSetPos(int deg)
     Serial.print(deg);
     Serial.print(" degrees\n");
 };
+#pragma endregion
 
+#pragma region LEDs
 /**
  * Sets LED color
  * @param group LED Light group (int {0 = Group 0 (indicators), 1 = Group 1 (underglow)})
@@ -254,6 +271,9 @@ void Rover::colorFlash(int group, int R, int G, int B, int del)
         analogWrite(_LED0_B, 0);
     }
 }
+#pragma endregion
+
+#pragma region Misc
 /**
  * Makes rover dance
  **/
@@ -296,3 +316,4 @@ void Rover::rainbowLights()
         }
     }
 };
+#pragma endregion
