@@ -85,62 +85,37 @@ void Rover::begin()
  **/
 int Rover::isOffLine()
 {
-    static int L = 0;
-    int L_raw = analogRead(_L_PHOTORESISTOR);
-    L = ((L * 3) + L_raw) / 4;
+    int val[3];
+    const int min[3] = {161, 150, 155};
+    const int max[3] = {460, 420, 340};
 
-    static int M = 0;
+    static int val[0] = 0;
+    int L_raw = analogRead(_L_PHOTORESISTOR);
+    val[0] = ((val[0] * 3) + L_raw) / 4;
+    val[0] = val[0]*(max[0] - min[0]) + min[0]
+
+    static int val[1] = 0;
     int M_raw = analogRead(_M_PHOTORESISTOR);
-    M = ((M * 3) + M_raw) / 4;
+    val[1] = ((val[1] * 3) + M_raw) / 4;
+    val[1] = val[1]*(max[0] - min[0]) + min[0]
 
     static int R = 0;
     int R_raw = analogRead(_R_PHOTORESISTOR);
-    R = ((R * 3) + R_raw) / 4;
+    val[2] = ((val[2] * 3) + R_raw) / 4;
+    val[2] = val[2]*(max[0] - min[0]) + min[0]
 
+    int condition[3];
     // Condition 0 = white
     // Condition 1 = grey (fading between white and black)
     // Condition 2 = black
-    int L_condition;
-    int M_condition;
-    int R_condition;
-
-    if (L <= 190)
-    {
-        L_condition = 0;
-    }
-    else if (L > 190 && L <= 210)
-    {
-        L_condition = 1;
-    }
-    else if (L > 210)
-    {
-        L_condition = 2;
-    }
-
-    if (M <= 170)
-    {
-        M_condition = 0;
-    }
-    else if (M > 170 && M <= 320)
-    {
-        M_condition = 1;
-    }
-    else if (M > 320)
-    {
-        M_condition = 2;
-    }
-
-    if (R <= 180)
-    {
-        R_condition = 0;
-    }
-    else if (R > 180 && R <= 240)
-    {
-        R_condition = 1;
-    }
-    else if (R > 240)
-    {
-        R_condition = 2;
+    for (i=0, i<=3, i++){
+        if (val[i] <= 0.2) {
+            condition[i] = 0
+        } else if (val[i] > 0.2 && val[i] < 0.8) {
+            condition[i] = 1
+        } else if (val[i] > 0.8) {
+            condition[i] = 2
+        }
     }
 
     // case 0 = All white
@@ -153,57 +128,57 @@ int Rover::isOffLine()
 
     // All white
     if (
-        L_condition == 0 &&
-        M_condition == 0 &&
-        R_condition == 0)
+        condition[0] == 0 &&
+        condition[1] == 0 &&
+        condition[2] == 0)
     {
         return 0;
     }
     // Maintain course
     else if (
-        L_condition == 0 &&
-        M_condition != 0 &&
-        R_condition == 0)
+        condition[0] == 0 &&
+        condition[1] != 0 &&
+        condition[2] == 0)
     {
         return 2;
     }
     // Left Small
     else if (
-        L_condition == 0 &&
-        M_condition == 1 &&
-        R_condition != 0)
+        condition[0] == 0 &&
+        condition[1] == 1 &&
+        condition[2] != 0)
     {
         return 3;
     }
     // Left Big
     else if (
-        L_condition == 0 &&
-        M_condition == 0 &&
-        R_condition != 1)
+        condition[0] == 0 &&
+        condition[1] == 0 &&
+        condition[2] != 1)
     {
         return 4;
     }
     // Right Small
     else if (
-        L_condition != 0 &&
-        M_condition == 1 &&
-        R_condition == 0)
+        condition[0] != 0 &&
+        condition[1] == 1 &&
+        condition[2] == 0)
     {
         return 5;
     }
     // Right Big
     else if (
-        L_condition != 0 &&
-        M_condition == 0 &&
-        R_condition == 1)
+        condition[0] != 0 &&
+        condition[1] == 0 &&
+        condition[2] == 1)
     {
         return 6;
     }
     // All black (error)
     else if (
-        L_condition != 0 &&
-        M_condition != 0 &&
-        R_condition != 0)
+        condition[0] != 0 &&
+        condition[1] != 0 &&
+        condition[2] != 0)
     {
         return 1;
     }
