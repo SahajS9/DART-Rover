@@ -35,3 +35,5 @@
 
 # Arduino libraries
 libraries
+main
+sensorcheck
