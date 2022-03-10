@@ -92,40 +92,55 @@ int Rover::isOffLine()
     static int M = 0;
     int M_raw = analogRead(_M_PHOTORESISTOR);
     M = ((M * 3) + M_raw) / 4;
-    
+
     static int R = 0;
     int R_raw = analogRead(_R_PHOTORESISTOR);
     R = ((R * 3) + R_raw) / 4;
 
-    //Condition 0 = white
-    //Condition 1 = grey
-    //Condition 2 = black
+    // Condition 0 = white
+    // Condition 1 = grey (fading between white and black)
+    // Condition 2 = black
     int L_condition;
     int M_condition;
     int R_condition;
 
-    if (L <= 190) {
-        L_condition = 0
-    } else if (L > 190 && L <= 210) {
-        L_condition = 1
-    } else if (L > 210) {
-        L_condition = 2
+    if (L <= 190)
+    {
+        L_condition = 0;
+    }
+    else if (L > 190 && L <= 210)
+    {
+        L_condition = 1;
+    }
+    else if (L > 210)
+    {
+        L_condition = 2;
     }
 
-    if (M <= 170) {
-        M_condition = 0
-    } else if (M > 170 && M <= 320) {
-        M_condition = 1
-    } else if (M > 320) {
-        M_condition = 2
+    if (M <= 170)
+    {
+        M_condition = 0;
+    }
+    else if (M > 170 && M <= 320)
+    {
+        M_condition = 1;
+    }
+    else if (M > 320)
+    {
+        M_condition = 2;
     }
 
-    if (R <= 180) {
-        R_condition = 0
-    } else if (R > 180 && R <= 240) {
-        R_condition = 1
-    } else if (R > 240) {
-        R_condition = 2
+    if (R <= 180)
+    {
+        R_condition = 0;
+    }
+    else if (R > 180 && R <= 240)
+    {
+        R_condition = 1;
+    }
+    else if (R > 240)
+    {
+        R_condition = 2;
     }
 
     // case 0 = All white
@@ -136,43 +151,66 @@ int Rover::isOffLine()
     // case 5 = Right Small
     // case 6 = Right Big
 
-    if ( //All white
+    // All white
+    if (
         L_condition == 0 &&
         M_condition == 0 &&
-        R_condition == 0
-    ) {return 0;} 
-    else if ( //Maintain course
+        R_condition == 0)
+    {
+        return 0;
+    }
+    // Maintain course
+    else if (
         L_condition == 0 &&
         M_condition != 0 &&
-        R_condition == 0
-    ) {return 2;}
-    else if ( //Left Small
+        R_condition == 0)
+    {
+        return 2;
+    }
+    // Left Small
+    else if (
         L_condition == 0 &&
         M_condition == 1 &&
-        R_condition != 0
-    ) {return 3;}
-    else if ( //Left Big
+        R_condition != 0)
+    {
+        return 3;
+    }
+    // Left Big
+    else if (
         L_condition == 0 &&
         M_condition == 0 &&
-        R_condition != 1
-    ) {return 4;}
-    else if ( //Right Small
+        R_condition != 1)
+    {
+        return 4;
+    }
+    // Right Small
+    else if (
         L_condition != 0 &&
         M_condition == 1 &&
-        R_condition == 0
-    ) {return 5;}
-    else if ( //Right Big
-        L_condition == 0 &&
+        R_condition == 0)
+    {
+        return 5;
+    }
+    // Right Big
+    else if (
+        L_condition != 0 &&
         M_condition == 0 &&
-        R_condition != 1
-    ) {return 6;}
-    else if ( //All black (error)
+        R_condition == 1)
+    {
+        return 6;
+    }
+    // All black (error)
+    else if (
         L_condition != 0 &&
         M_condition != 0 &&
-        R_condition != 0
-    ) {return 1;}
-    else {return 1;}
-
+        R_condition != 0)
+    {
+        return 1;
+    }
+    else
+    {
+        return 1;
+    }
 }
 #pragma endregion
 

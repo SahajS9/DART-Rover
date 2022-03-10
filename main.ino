@@ -142,7 +142,7 @@ void loop()
         switch (rover.isOffLine())
         {
         case 2:
-        // Rover on track, maintain course
+            // Rover on track, maintain course
             if (turningStraight == false)
             {
                 rover.motorSet(slowSpeed);
@@ -157,7 +157,7 @@ void loop()
 
         // case 3 and 5 is when starting to veer off, but not nearly completely off yet
         case 3:
-        // if middle PR and left PR gets high signal
+            // if middle PR and left PR gets high signal
             if (turningLeft == false)
             {
                 rover.steerLeft(turnRadius1);
@@ -188,7 +188,7 @@ void loop()
 
         // case 4 and 6 is used when track veered more than above could account for
         case 4:
-        // only Left PR on line, turning left
+            // only Left PR on line, turning left
             if (turningLeftMore == false)
             {
                 rover.motorSet(slowSpeed);
@@ -225,7 +225,8 @@ void loop()
         case 0:
             timer++; // counts up each loop so if rover off track for more than one second, stop
             delay(1);
-            if (timer > timeUntilOffTrack) {
+            if (timer > timeUntilOffTrack)
+            {
                 timer = 0;
                 offTrack = true;
                 rover.motorSet(0);
@@ -240,7 +241,9 @@ void loop()
                 delay(125);
                 rover.colorFlash(0, yellow[0], yellow[1], yellow[2], 125);
                 delay(125);
-            } else {
+            }
+            else
+            {
                 timer = 0; // resets timer if back on line or some other condition
             }
             break;
@@ -262,13 +265,11 @@ void loop()
     }
 #pragma endregion
 
-
     // exits loop early because cup has already been picked up if this is true
     if (finished1 == true)
     {
         return;
     }
-
 
 #pragma region Signature Detection(Transition)
     if (locatingTarget == false && offTrack == true)
@@ -302,7 +303,6 @@ void loop()
         }
     }
 #pragma endregion
-
 
 #pragma region PixyCam Logic
     if (locatingTarget == true)
