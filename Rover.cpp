@@ -90,21 +90,21 @@ bool Rover::isOffLine(int pr)
         static int L = 0;
         int L_raw = analogRead(_L_PHOTORESISTOR);
         L = ((L * 3) + L_raw) / 4;
-        return (analogRead(_L_PHOTORESISTOR) < 500);
+        return (analogRead(_L_PHOTORESISTOR) < 400);
     }
     else if (pr == 1)
     {
         static int M = 0;
         int M_raw = analogRead(_M_PHOTORESISTOR);
         M = ((M * 3) + M_raw) / 4;
-        return (analogRead(_M_PHOTORESISTOR) < 400);
+        return (analogRead(_M_PHOTORESISTOR) < 300);
     }
     else if (pr == 2)
     {
         static int R = 0;
         int R_raw = analogRead(_R_PHOTORESISTOR);
         R = ((R * 3) + R_raw) / 4;
-        return (analogRead(_R_PHOTORESISTOR) < 350);
+        return (analogRead(_R_PHOTORESISTOR) < 400);
     }
     else
     {

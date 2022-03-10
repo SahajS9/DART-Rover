@@ -8,58 +8,59 @@
 #include <Servo.h>
 #include "Rover.h"
 
-// pin definitions
-const int STEERING_SERVO = 3;
-const int CLAW_SERVO = 2;
-const int MOTOR = 4;
+  // pin definitions
+  // pins with PWM: 3,5,6,9,10,11
+  const int CLAW_SERVO = 2;
+  const int STEERING_SERVO = 4;
+  const int MOTOR = 7;
 
-const uint8_t L_PHOTORESISTOR = A0;
-const uint8_t M_PHOTORESISTOR = A1;
-const uint8_t R_PHOTORESISTOR = A2;
+  const uint8_t L_PHOTORESISTOR = A0;
+  const uint8_t M_PHOTORESISTOR = A1;
+  const uint8_t R_PHOTORESISTOR = A2;
 
-const int LED0_R = 10;
-const int LED0_G = 9;
-const int LED0_B = 8;
+  const int LED0_R = 10;
+  const int LED0_G = 9;
+  const int LED0_B = 8;
 
-const int LED1_R = 7;
-const int LED1_G = 6;
-const int LED1_B = 5;
+  const int LED1_R = 6;
+  const int LED1_G = 5;
+  const int LED1_B = 3;
 
-Rover rover(
-    STEERING_SERVO,
-    CLAW_SERVO,
-    MOTOR,
-    L_PHOTORESISTOR,
-    R_PHOTORESISTOR,
-    M_PHOTORESISTOR,
-    LED0_R,
-    LED0_G,
-    LED0_B,
-    LED1_R,
-    LED1_G,
-    LED1_B);
+  Rover rover(
+      STEERING_SERVO,
+      CLAW_SERVO,
+      MOTOR,
+      L_PHOTORESISTOR,
+      R_PHOTORESISTOR,
+      M_PHOTORESISTOR,
+      LED0_R,
+      LED0_G,
+      LED0_B,
+      LED1_R,
+      LED1_G,
+      LED1_B);
 
-// debug mode
-bool debug = false;
+  // debug mode
+  bool debug = false;
 
-// led colors
-const int white[3] = {255, 255, 255};
-const int red[3] = {255, 0, 0};
-const int green[3] = {0, 255, 0};
-const int blue[3] = {0, 0, 255};
-const int yellow[3] = {255, 180, 0};
-const int off[3] = {0, 0, 0};
+  // led colors
+  const int white[3] = {255, 255, 255};
+  const int red[3] = {255, 0, 0};
+  const int green[3] = {0, 255, 0};
+  const int blue[3] = {0, 0, 255};
+  const int yellow[3] = {255, 180, 0};
+  const int off[3] = {0, 0, 0};
 
-// misc for logics
-int i;
-bool finished = false;
-bool lineFollowing = true;
-bool locatingTarget = false;
-char lastLineLocation = ' '; // L = left, R = right
-bool runOnce = false;
+  // misc for logics
+  int i;
+  bool finished = false;
+  bool lineFollowing = true;
+  bool locatingTarget = false;
+  char lastLineLocation = ' '; // L = left, R = right
+  bool runOnce = false;
 
-void setup()
-{
+  void setup()
+  {
     rover.begin();
     rover.steerStraight();
     Serial.begin(115200); // baud rate for serial monitor
