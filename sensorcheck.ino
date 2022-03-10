@@ -1,4 +1,4 @@
-// main file for DART rover autonomous functions
+  // main file for DART rover autonomous functions
 // author: Sage, co-author: Aaron
 // pin variables are in all CAPS, other variables are lowerCamelCase; and vars are zero-based indexed (starting from 0)
 // gets llbrary built for this project from Rover.h, which will get its functions from Rover.cpp
@@ -56,7 +56,7 @@ bool finished = false;
 bool lineFollowing = true;
 bool locatingTarget = false;
 char lastLineLocation = ' '; // L = left, R = right
-bool runOnce = true;
+bool runOnce = false;
 
 void setup()
 {
@@ -75,19 +75,19 @@ void setup()
 void loop()
 {
     // Photoresistor Test
-    //  Serial.print("L = ");
-    //  Serial.print(analogRead(L_PHOTORESISTOR));
-    //  Serial.print("    M = ");
-    //  Serial.print(analogRead(M_PHOTORESISTOR));
-    //  Serial.print("    R = ");
-    //  Serial.print(analogRead(R_PHOTORESISTOR));
-    //  Serial.print("\n");
+      Serial.print("L = ");
+      Serial.print(analogRead(L_PHOTORESISTOR));
+      Serial.print("    M = ");
+      Serial.print(analogRead(M_PHOTORESISTOR));
+      Serial.print("    R = ");
+      Serial.print(analogRead(R_PHOTORESISTOR));
+      Serial.print("\n");
 
     if (runOnce == true)
     {
         rover.clawSet(false);
         delay(1000);
-        rover.clawSet(true);
+        rover.clawSet(true);  
         delay(5000);
         rover.motorSet(10);
         delay(3000);
