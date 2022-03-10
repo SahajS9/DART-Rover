@@ -186,6 +186,18 @@ void loop()
         while (rover.isOffLine(0) == false && rover.isOffLine(1) == true && rover.isOffLine(2) == true)
         {
             if (turningLeftMore == false)
+            {
+                rover.motorSet(slowSpeed);
+                rover.steerLeft(turnRadius2);
+                Serial.println("Low signal on left side, turning left more");
+                rover.colorSet(0, red[0], red[1], red[2]);
+                rover.colorSet(0, yellow[0], yellow[1], yellow[2]);
+                turningStraight = false;
+                turningLeft = false;
+                turningRight = false;
+                turningLeftMore = true;
+                turningRightMore = false;
+            }
         }
         // only right PR on line, turning right
         // this means track veered more than above could account for
@@ -201,8 +213,8 @@ void loop()
                 turningStraight = false;
                 turningLeft = false;
                 turningRight = false;
-                turningLeftMore = true;
-                turningRightMore = false;
+                turningLeftMore = false;
+                turningRightMore = true;
             }
         }
 
