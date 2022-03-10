@@ -20,9 +20,9 @@ const uint8_t L_PHOTORESISTOR = A0;
 const uint8_t M_PHOTORESISTOR = A1;
 const uint8_t R_PHOTORESISTOR = A2;
 
-const int LED0_R = 11;
-const int LED0_G = 10;
-const int LED0_B = 9;
+const int LED0_R = 10;
+const int LED0_G = 9;
+const int LED0_B = 8;
 
 const int LED1_R = 6;
 const int LED1_G = 5;
@@ -59,13 +59,14 @@ int i;
 int timer;
 bool finished1 = false;
 bool finished2 = false;
-bool lineFollowing = true;   // mode 1
+bool offTrack = false;
+bool lineFollowing = false;   // mode 1
 bool locatingTarget = false; // mode 2
 bool alignedWithTarget = false;
 char lastLineLocation = ' '; // L = left, R = right | memory to remember where line was if lost
-const int slowSpeed = 30;    // min 30(?)
-const int turnRadius1 = 15;
-const int turnRadius2 = 18;
+const int slowSpeed = 35;    // min 30(?)
+const int turnRadius1 = 18;
+const int turnRadius2 = 24;
 
 void setup()
 {
@@ -86,6 +87,7 @@ void setup()
     rover.colorSet(0, off[0], off[1], off[2]);
     delay(2000); // uncomment this line to make 5 seconds of delay once testing on track
     Serial.print("Engaging line following mode (Startup)\n");
+    lineFollowing = true;
     rover.colorSet(1, white[0], white[1], white[2]); // turn on floor-facing lights, set to white
 }
 
@@ -171,9 +173,9 @@ void loop()
         {
             timer++; // counts up each loop so if rover off track for more than one second, stop
             delay(1);
-            if (timer > 1000)
+            if (timer > 3000)
             {
-                timer = 0;
+                timer = 0; offTrack = true;
                 Serial.println("All PRs had high signal for at least one second");
                 rover.motorSet(0);
                 rover.steerStraight();
@@ -204,7 +206,7 @@ void loop()
             delay(125);
             return;
         }
-        Serial.println("-------"); // indicates reached end of line following loop
+        // Serial.println("-------"); // indicates reached end of line following loop
     }
 #pragma endregion
 
@@ -215,9 +217,9 @@ void loop()
     }
 
 #pragma region Signature Detection(Transition)
-    if (locatingTarget == false)
+    if (locatingTarget == false && offTrack == true)
     {
-        Serial.println("Checking for signatures");
+        // Serial.println("Checking for signatures");
         rover.pixy.ccc.getBlocks();
         if (!rover.pixy.ccc.numBlocks)
         {
@@ -232,7 +234,7 @@ void loop()
         {
             if (rover.pixy.ccc.blocks[i].m_height >= 2 || rover.pixy.ccc.blocks[i].m_width >= 2) // temporarily set as an arbitrary value, needs to be whatever size is once reached end of line, this is to avoid false positives
             {
-                Serial.println("Detected target, switching to target locating mode");
+                Serial.println("Detected target while off track, switching to target locating mode");
                 lineFollowing = false;
                 locatingTarget = true;
                 rover.clawSet(true); // opens claw for grabbing target
@@ -242,7 +244,7 @@ void loop()
                 delay(125);
                 rover.colorFlash(0, green[0], green[1], green[2], 125);
                 rover.pixy.setLED(yellow[0], yellow[1], yellow[2]); // sets camera lower lamp to yellow
-                // rover.pixy.setLamp(1, 1);                           // turns on upper lamps for camera
+                rover.pixy.setLamp(1, 1);                           // turns on upper lamps for camera
             }
         }
     }
@@ -289,7 +291,7 @@ void loop()
                 alignedWithTarget = true;
                 Serial.println("Aligned with target");
             }
-            if (rover.pixy.ccc.blocks[i].m_width >= 110 && alignedWithTarget == true) // once close enough, stop and grab it
+            if (rover.pixy.ccc.blocks[i].m_width >= 250 && alignedWithTarget == true) // once close enough, stop and grab it
             {
                 Serial.println("Target is aligned and within reach, grabbing");
                 rover.motorSet(0);

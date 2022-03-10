@@ -87,14 +87,23 @@ bool Rover::isOffLine(int pr)
 {
     if (pr == 0)
     {
-        return (analogRead(_L_PHOTORESISTOR) < 700);
+        static int L = 0;
+        int L_raw = analogRead(_L_PHOTORESISTOR);
+        L = ((L * 3) + L_raw) / 4;
+        return (analogRead(_L_PHOTORESISTOR) < 450);
     }
     else if (pr == 1)
     {
-        return (analogRead(_M_PHOTORESISTOR) < 300);
+        static int M = 0;
+        int M_raw = analogRead(_M_PHOTORESISTOR);
+        M = ((M * 3) + M_raw) / 4;
+        return (analogRead(_M_PHOTORESISTOR) < 250);
     }
     else if (pr == 2)
     {
+        static int R = 0;
+        int R_raw = analogRead(_R_PHOTORESISTOR);
+        R = ((R * 3) + R_raw) / 4;
         return (analogRead(_R_PHOTORESISTOR) < 550);
     }
     else
@@ -179,7 +188,7 @@ void Rover::clawSet(bool status)
     if (status)
     {
         Serial.print("Opening claw");
-        for (pos = 50; pos >= 0; pos -= 1)
+        for (pos = 80; pos >= 0; pos -= 1)
         {
             _smallservo.write(pos);
             delay(30);
@@ -188,7 +197,7 @@ void Rover::clawSet(bool status)
     else
     {
         Serial.print("Closing claw");
-        for (pos = 0; pos <= 80; pos += 1)
+        for (pos = 0; pos <= 50; pos += 1)
         {
             _smallservo.write(pos);
             delay(30);

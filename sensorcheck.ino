@@ -75,13 +75,18 @@ void setup()
 void loop()
 {
     // Photoresistor Test
-      Serial.print("L = ");
-      Serial.print(analogRead(L_PHOTORESISTOR));
-      Serial.print("    M = ");
-      Serial.print(analogRead(M_PHOTORESISTOR));
-      Serial.print("    R = ");
-      Serial.print(analogRead(R_PHOTORESISTOR));
-      Serial.print("\n");
+      // Serial.print("L = ");
+      // Serial.print(analogRead(L_PHOTORESISTOR));
+      // Serial.print("    M = ");
+      // Serial.print(analogRead(M_PHOTORESISTOR));
+      // Serial.print("    R = ");
+      // Serial.print(analogRead(R_PHOTORESISTOR));
+      // Serial.print("\n");
+    Serial.print(analogRead(L_PHOTORESISTOR));
+    Serial.print(" ");
+    Serial.print(analogRead(M_PHOTORESISTOR));
+    Serial.print(" ");
+    Serial.print(analogRead(R_PHOTORESISTOR));
 
     if (runOnce == true)
     {
