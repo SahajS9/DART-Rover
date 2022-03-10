@@ -90,21 +90,21 @@ bool Rover::isOffLine(int pr)
         static int L = 0;
         int L_raw = analogRead(_L_PHOTORESISTOR);
         L = ((L * 3) + L_raw) / 4;
-        return (analogRead(_L_PHOTORESISTOR) < 450);
+        return (analogRead(_L_PHOTORESISTOR) < 500);
     }
     else if (pr == 1)
     {
         static int M = 0;
         int M_raw = analogRead(_M_PHOTORESISTOR);
         M = ((M * 3) + M_raw) / 4;
-        return (analogRead(_M_PHOTORESISTOR) < 250);
+        return (analogRead(_M_PHOTORESISTOR) < 400);
     }
     else if (pr == 2)
     {
         static int R = 0;
         int R_raw = analogRead(_R_PHOTORESISTOR);
         R = ((R * 3) + R_raw) / 4;
-        return (analogRead(_R_PHOTORESISTOR) < 550);
+        return (analogRead(_R_PHOTORESISTOR) < 350);
     }
     else
     {
@@ -113,7 +113,7 @@ bool Rover::isOffLine(int pr)
 
     // SHARPIE LINE = L560 M370 R420
     // PRINTER PAPER = L300 M200 R270
-    // TRACK = L450 M250 R400
+    // TRACK = L500 M400 R350
     // BRANDYWINE @ 6:30 = 700 300 550
 }
 #pragma endregion
@@ -125,9 +125,9 @@ bool Rover::isOffLine(int pr)
  **/
 void Rover::steerRight(int deg)
 {
-    if (deg < 0 || deg > 33)
+    if (deg < 0 || deg > 50)
     {
-        deg = deg < 0 ? 0 : 33;
+        deg = deg < 0 ? 0 : 50;
     }
 
     _largeservo.write(steeringAlignment + deg);
@@ -142,9 +142,9 @@ void Rover::steerRight(int deg)
  **/
 void Rover::steerLeft(int deg)
 {
-    if (deg < 0 || deg > 33)
+    if (deg < 0 || deg > 50)
     {
-        deg = deg < 0 ? 0 : 33;
+        deg = deg < 0 ? 0 : 50;
     }
     _largeservo.write(steeringAlignment - deg);
     Serial.print("Turning left by ");

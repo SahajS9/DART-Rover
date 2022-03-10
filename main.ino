@@ -64,9 +64,9 @@ bool lineFollowing = false;   // mode 1
 bool locatingTarget = false; // mode 2
 bool alignedWithTarget = false;
 char lastLineLocation = ' '; // L = left, R = right | memory to remember where line was if lost
-const int slowSpeed = 35;    // min 30(?)
-const int turnRadius1 = 18;
-const int turnRadius2 = 24;
+const int slowSpeed = 40;    // min 30(?)
+const int turnRadius1 = 15;
+const int turnRadius2 = 25;
 
 void setup()
 {
