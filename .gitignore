@@ -31,7 +31,12 @@
 *.out
 *.app
 
+# VSC
 .vscode
 
 # Arduino libraries
 libraries
+
+# Tesing
+main
+sensorcheck
