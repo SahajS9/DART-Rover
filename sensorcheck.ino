@@ -52,7 +52,7 @@
   const int off[3] = {0, 0, 0};
 
   // misc for logics
-  int i;
+  // int i;
   bool finished = false;
   bool lineFollowing = true;
   bool locatingTarget = false;
