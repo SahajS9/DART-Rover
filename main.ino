@@ -91,6 +91,7 @@ void setup()
     unsigned long int max[3] = {};
 
     Serial.println("Sampling light region");
+    rover.colorSet(1, white[0], white[1], white[2]);
     for (int i = 0; i<=100; i++) {
         static int L = 0;
         int L_raw = analogRead(L_PHOTORESISTOR);
@@ -126,6 +127,7 @@ void setup()
     delay(1500);
 
     Serial.println("Sampling dark region");
+    rover.colorSet(1, white[0], white[1], white[2]);
     for (int i = 0; i<=100; i++) {
         static int L = 0;
         int L_raw = analogRead(L_PHOTORESISTOR);
@@ -152,6 +154,7 @@ void setup()
 
         delay(10);
     }
+    rover.colorSet(0, off[0], off[1], off[2]);
 
     //debugging purposes
     for (int i = 0; i<=2; i++) {
@@ -172,7 +175,6 @@ void setup()
     }
 
     #pragma endregion
-    rover.colorSet(0, off[0], off[1], off[2]);
     delay(3000); // uncomment this line to make 5 seconds of delay once testing on track
     Serial.print("Engaging line following mode (Startup)\n");
     lineFollowing = true;
