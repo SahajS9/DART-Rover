@@ -42,6 +42,7 @@ class Rover
         );
 
         void begin();
+        void calibrate(int min[3], int max[3]);
 
         //steering controls
         void steerLeft(int degrees);
@@ -70,6 +71,8 @@ class Rover
         Pixy2 pixy;
     
     private:
+        float _min[3];
+        float _max[3];
         int _STEERING_SERVO;
         int _CLAW_SERVO;
         int _MOTOR;

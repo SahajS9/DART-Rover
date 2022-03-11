@@ -83,21 +83,29 @@ void loop()
       // Serial.print("    R = ");
       // Serial.print(analogRead(R_PHOTORESISTOR));
       // Serial.print("\n");
-  static int L = 0;
-  int L_raw = analogRead(L_PHOTORESISTOR);
-  L = ((L * 3) + L_raw) / 4;
-  Serial.print(L);
-  Serial.print(' ');
+      static int val[3];
+      float floatval[3];
+      const int min[3] = {101, 61, 75};
+      const int max[3] = {175, 124, 112};
+  
+      val[0] = 0;
+      int L_raw = analogRead(L_PHOTORESISTOR);
+      val[0] = ((val[0] * 3) + L_raw) / 4;
+      floatval[0] = val[0]*(1/((float)max[0] - (float)min[0])) - (float)min[0]*(1/((float)max[0] - (float)min[0]));
+  
+      val[1] = 0;
+      int M_raw = analogRead(M_PHOTORESISTOR);
+      val[1] = ((val[1] * 3) + M_raw) / 4;
+      floatval[1] = val[1]*(1/((float)max[1] - (float)min[1])) - (float)min[1]*(1/((float)max[1] - (float)min[1]));
+  
+      val[2] = 0;
+      int R_raw = analogRead(R_PHOTORESISTOR);
+      val[2] = ((val[2] * 3) + R_raw) / 4;
+      floatval[2] = val[2]*(1/((float)max[2] - (float)min[2])) - (float)min[2]*(1/((float)max[2] - (float)min[2]));
 
-  static int M = 0;
-  int M_raw = analogRead(M_PHOTORESISTOR);
-  M = ((M * 3) + M_raw) / 4;
-  Serial.print(M);
-  Serial.print(' ');
-
-  static int R = 0;
-  int R_raw = analogRead(R_PHOTORESISTOR);
-  R = ((R * 3) + R_raw) / 4;
-  Serial.print(R);
-  Serial.print(' ');
+      for (int i=0; i<=2; i++) {
+        Serial.print(floatval[i]);
+        Serial.print(' ');
+      }
+      Serial.print('\n');
 }
