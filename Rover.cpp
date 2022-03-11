@@ -76,8 +76,8 @@ void Rover::begin()
 };
 
 void Rover::calibrate(int min[3], int max[3]){
-    _min[3] = (float)min[3];
-    _max[3] = (float)max[3];
+    _min[3] = min[3];
+    _max[3] = max[3];
 };
 #pragma endregion
 
