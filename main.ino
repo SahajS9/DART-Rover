@@ -85,34 +85,98 @@ void setup()
     rover.pixy.setLED(off[0], off[1], off[2]);
     rover.clawSetPos(80); // closes claw
     // start-up lights
+
+    #pragma region Print PR values
+    unsigned long int min[3] = {};
+    unsigned long int max[3] = {};
+
+    Serial.println("Sampling light region");
+    for (int i = 0; i<=100; i++) {
+        static int L = 0;
+        int L_raw = analogRead(L_PHOTORESISTOR);
+        L = ((L * 3) + L_raw) / 4;
+        min[0] += L;
+
+        static int M = 0;
+        int M_raw = analogRead(M_PHOTORESISTOR);
+        M = ((M * 3) + M_raw) / 4;
+        min[1] += M;
+
+        static int R = 0;
+        int R_raw = analogRead(R_PHOTORESISTOR);
+        R = ((R * 3) + R_raw) / 4;
+        min[2] += R;
+
+        Serial.print(L);
+        Serial.print(' ');
+        Serial.print(M);
+        Serial.print(' ');
+        Serial.print(R);
+        Serial.print(' ');
+        Serial.print('\n');
+
+        delay(10);
+    }
+
     rover.colorSet(0, red[0], red[1], red[2]);
-    delay(1000);
+    delay(1500);
     rover.colorSet(0, yellow[0], yellow[1], yellow[2]);
-    delay(1000);
+    delay(1500);
     rover.colorSet(0, green[0], green[1], green[2]);
-    delay(1000);
-    delay(2000); // uncomment this line to make 5 seconds of delay once testing on track
+    delay(1500);
+
+    Serial.println("Sampling dark region");
+    for (int i = 0; i<=100; i++) {
+        static int L = 0;
+        int L_raw = analogRead(L_PHOTORESISTOR);
+        L = ((L * 3) + L_raw) / 4;
+        max[0] += L;
+
+        static int M = 0;
+        int M_raw = analogRead(M_PHOTORESISTOR);
+        M = ((M * 3) + M_raw) / 4;
+        max[1] += M;
+
+        static int R = 0;
+        int R_raw = analogRead(R_PHOTORESISTOR);
+        R = ((R * 3) + R_raw) / 4;
+        max[2] += R;
+
+        Serial.print(L);
+        Serial.print(' ');
+        Serial.print(M);
+        Serial.print(' ');
+        Serial.print(R);
+        Serial.print(' ');
+        Serial.print('\n');
+
+        delay(10);
+    }
+
+    //debugging purposes
+    for (int i = 0; i<=2; i++) {
+        min[i] = min[i]/100;
+        max[i] = max[i]/100;
+    }
+
+    Serial.print("Minimums: ");
+    for (int i = 0; i<=2; i++) {
+        Serial.print(min[i]);
+        Serial.print(' ');
+    }
+    Serial.print('\n');
+    Serial.print("Maximums: ");
+    for (int i = 0; i<=2; i++) {
+        Serial.print(max[i]);
+        Serial.print(' ');
+    }
+
+    #pragma endregion
     rover.colorSet(0, off[0], off[1], off[2]);
+    delay(3000); // uncomment this line to make 5 seconds of delay once testing on track
     Serial.print("Engaging line following mode (Startup)\n");
     lineFollowing = true;
     rover.colorSet(1, white[0], white[1], white[2]); // turn on floor-facing lights, set to white
-
-#pragma region Print PR values
-    static int L = 0;
-    int L_raw = analogRead(L_PHOTORESISTOR);
-    L = ((L * 3) + L_raw) / 4;
-    Serial.println(L_raw);
-
-    static int M = 0;
-    int M_raw = analogRead(M_PHOTORESISTOR);
-    M = ((M * 3) + M_raw) / 4;
-    Serial.println(M_raw);
-
-    static int R = 0;
-    int R_raw = analogRead(R_PHOTORESISTOR);
-    R = ((R * 3) + R_raw) / 4;
-    Serial.println(R_raw);
-#pragma endregion
 }
 
 void loop()
