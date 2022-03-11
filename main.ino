@@ -68,8 +68,9 @@ bool turningStraight;        // added turning* to reduce serial monitor spam and
 bool lineFollowing = false;  // mode 1
 bool locatingTarget = false; // mode 2
 bool alignedWithTarget = false;
-char lastLineLocation = ' ';        // L = left, R = right | memory to remember where line was if lost
-const int slowSpeed = 40;           // min > 30(?)
+char lastLineLocation = ' '; // L = left, R = right | memory to remember where line was if lost
+const int slowSpeed1 = 20;
+const int slowSpeed2 = 25;
 const int turnRadius1 = 12;         // smaller turn radius
 const int turnRadius2 = 14;         // larger turn radius
 const int timeUntilOffTrack = 1000; // time until all PRs being high to think line has stopped
@@ -95,6 +96,23 @@ void setup()
     Serial.print("Engaging line following mode (Startup)\n");
     lineFollowing = true;
     rover.colorSet(1, white[0], white[1], white[2]); // turn on floor-facing lights, set to white
+
+#pragma region Print PR values
+    static int L = 0;
+    int L_raw = analogRead(L_PHOTORESISTOR);
+    L = ((L * 3) + L_raw) / 4;
+    Serial.println(L);
+
+    static int M = 0;
+    int M_raw = analogRead(M_PHOTORESISTOR);
+    M = ((M * 3) + M_raw) / 4;
+    Serial.println(M);
+
+    static int R = 0;
+    int R_raw = analogRead(R_PHOTORESISTOR);
+    R = ((R * 3) + R_raw) / 4;
+    Serial.println(R);
+#pragma endregion
 }
 
 void loop()
@@ -106,7 +124,7 @@ void loop()
         lineFollowing = true;
         locatingTarget = false;
         rover.colorSet(0, yellow[0], yellow[1], yellow[2]);
-        rover.motorSet(slowSpeed);
+        rover.motorSet(slowSpeed2);
         delay(250); // move forward for 1/4 second then resume loop
         return;
     }
@@ -137,7 +155,7 @@ void loop()
         {
             if (turningStraight == false)
             {
-                rover.motorSet(slowSpeed);
+                rover.motorSet(slowSpeed2);
                 rover.steerStraight();
                 Serial.println("On-course, going straight");
                 rover.colorSet(0, off[0], off[1], off[2]);
@@ -187,7 +205,7 @@ void loop()
         {
             if (turningLeftMore == false)
             {
-                rover.motorSet(slowSpeed);
+                rover.motorSet(slowSpeed2);
                 rover.steerLeft(turnRadius2);
                 Serial.println("Low signal on left side, turning left more");
                 rover.colorSet(0, red[0], red[1], red[2]);
@@ -205,7 +223,7 @@ void loop()
         {
             if (turningRightMore == false)
             {
-                rover.motorSet(slowSpeed);
+                rover.motorSet(slowSpeed2);
                 rover.steerRight(turnRadius2);
                 Serial.println("Low signal on right side, turning right more");
                 rover.colorSet(0, green[0], green[1], green[2]);
@@ -327,26 +345,26 @@ void loop()
             // x coord goes from 0 to 316, middle is 158, so center region is about from 140 to 176
             if (rover.pixy.ccc.blocks[i].m_x < 140) // turn left until center if target is on left side
             {
-                rover.motorSet(slowSpeed);
+                rover.motorSet(slowSpeed1);
                 rover.steerLeft(turnRadius1);
                 Serial.println("Turning left to align to target");
                 alignedWithTarget = false;
             }
             else if (rover.pixy.ccc.blocks[i].m_x > 176) // turn right until center if target is on right side
             {
-                rover.motorSet(slowSpeed);
+                rover.motorSet(slowSpeed1);
                 rover.steerRight(turnRadius1);
                 Serial.println("Turning right to align to target");
                 alignedWithTarget = false;
             }
             else
             {
-                rover.motorSet(slowSpeed);
+                rover.motorSet(slowSpeed1);
                 rover.steerStraight();
                 alignedWithTarget = true;
                 Serial.println("Aligned with target");
             }
-            if (rover.pixy.ccc.blocks[i].m_width >= 250 && alignedWithTarget == true) // once close enough, stop and grab it
+            if (rover.pixy.ccc.blocks[i].m_width >= 230 && alignedWithTarget == true) // once close enough, stop and grab it
             {
                 Serial.println("Target is aligned and within reach, grabbing");
                 rover.motorSet(0);

@@ -83,28 +83,31 @@ void Rover::begin()
  * @param pr Photoresistor to check (int {0 = L, 1 = M, 2 = R})
  * @returns bool - Whether or not photoresistor has high or low signal
  **/
+int L;
+int M;
+int R;
 bool Rover::isOffLine(int pr)
 {
     if (pr == 0)
     {
-        static int L = 0;
-        int L_raw = analogRead(_L_PHOTORESISTOR);
+        // static int L;
+       int L_raw = analogRead(_L_PHOTORESISTOR);
         L = ((L * 3) + L_raw) / 4;
-        return (analogRead(_L_PHOTORESISTOR) < 400);
+        return (L < 100);
     }
     else if (pr == 1)
     {
-        static int M = 0;
+        // static int M;
         int M_raw = analogRead(_M_PHOTORESISTOR);
         M = ((M * 3) + M_raw) / 4;
-        return (analogRead(_M_PHOTORESISTOR) < 300);
+        return (M < 100);
     }
     else if (pr == 2)
     {
-        static int R = 0;
+        // static int R;
         int R_raw = analogRead(_R_PHOTORESISTOR);
         R = ((R * 3) + R_raw) / 4;
-        return (analogRead(_R_PHOTORESISTOR) < 400);
+        return (R < 100);
     }
     else
     {
