@@ -353,17 +353,17 @@ void loop()
             //     Serial.println("Ignored young block");
             //     return; // exits loop if block isn't older than 60 frames (60fps, so 1 sec) (likely a false positive)
             // }
-            // x coord goes from 0 to 316, middle is 158, so center region is about from 140 to 176
-            if (rover.pixy.ccc.blocks[i].m_x < 140) // turn left until center if target is on left side
+            // x coord goes from 0 to 316, middle is 158, so center region is about from 148 to 168
+            if (rover.pixy.ccc.blocks[i].m_x < 148) // turn left until center if target is on left side
             {
-                rover.motorSet(slowSpeed1);
+                rover.motorSet(slowSpeed2);
                 rover.steerLeft(turnRadius1);
                 Serial.println("Turning left to align to target");
                 alignedWithTarget = false;
             }
-            else if (rover.pixy.ccc.blocks[i].m_x > 176) // turn right until center if target is on right side
+            else if (rover.pixy.ccc.blocks[i].m_x > 168) // turn right until center if target is on right side
             {
-                rover.motorSet(slowSpeed1);
+                rover.motorSet(slowSpeed2);
                 rover.steerRight(turnRadius1);
                 Serial.println("Turning right to align to target");
                 alignedWithTarget = false;
@@ -395,6 +395,5 @@ void loop()
     }
 #pragma endregion
 
-    // Serial.println("-------"); // indicates reached end of loop
     // Serial.println("");        // spacer
 }
