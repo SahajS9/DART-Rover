@@ -68,10 +68,10 @@ bool lineFollowing = false;  // mode 1
 bool locatingTarget = false; // mode 2
 bool alignedWithTarget = false;
 char lastLineLocation = ' '; // L = left, R = right | memory to remember where line was if lost
-const int slowSpeed1 = 30;
-const int slowSpeed2 = 35;  // min speed is probably 30
-const int turnRadius1 = 12;         // smaller turn radius
-const int turnRadius2 = 14;         // larger turn radius
+const int slowSpeed1 = 27;
+const int slowSpeed2 = 30;  // min speed is probably 30
+const int turnRadius1 = 15;         // smaller turn radius
+const int turnRadius2 = 24;         // larger turn radius
 const int timeUntilOffTrack = 1000; // time until all PRs being high to think line has stopped
 
 void setup()
