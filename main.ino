@@ -85,8 +85,8 @@ void setup()
     rover.clawSetPos(80); // closes claw
     // start-up lights
     rover.colorSet(1, white[0], white[1], white[2]); // turn on floor-facing lights, set to white
-    delay(1500);
     rover.colorSet(0, red[0], red[1], red[2]);
+    delay(1000);
     #pragma region Print PR values
     unsigned long int min[3] = {};
     unsigned long int max[3] = {};
@@ -119,7 +119,7 @@ void setup()
         delay(10);
     }
 
-    delay(500);
+    delay(3000);
     rover.colorSet(0, yellow[0], yellow[1], yellow[2]);
 
     Serial.println("Sampling dark region");
