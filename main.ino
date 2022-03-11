@@ -50,7 +50,7 @@ const int white[3] = {255, 255, 255};
 const int red[3] = {255, 0, 0};
 const int green[3] = {0, 255, 0};
 const int blue[3] = {0, 0, 255};
-const int yellow[3] = {255, 180, 0};
+const int yellow[3] = {255, 255, 0};
 const int magenta[3] = {255, 0, 255};
 const int off[3] = {0, 0, 0};
 
