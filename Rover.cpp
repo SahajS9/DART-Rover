@@ -108,7 +108,8 @@ bool Rover::isOffLine(int pr)
         int M_raw = analogRead(_M_PHOTORESISTOR);
         val[1] = ((val[1] * 3) + M_raw) / 4;
         floatval[1] = val[1]*(1/((float)_max[1] - (float)_min[1])) - (float)_min[1]*(1/((float)_max[1] - (float)_min[1]));
-        
+        Serial.println(floatval[1]); // extra verbosity, comment later
+
         return (floatval[1] < 300);
     }
     else if (pr == 2)
