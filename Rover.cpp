@@ -75,9 +75,11 @@ void Rover::begin()
     pinMode(_LED1_B, OUTPUT);
 };
 
-void Rover::calibrate(int min[3], int max[3]){
-    _min[3] = min[3];
-    _max[3] = max[3];
+void Rover::calibrate(unsigned long int min[3], unsigned long int max[3]){
+    for (int i = 0; i<=2; i++){
+        _min[i] = min[i];
+        _max[i] = max[i];
+    };
 };
 #pragma endregion
 
@@ -120,8 +122,6 @@ bool Rover::isOffLine(int pr)
     }
     else if (pr == 1)
     {
-        Serial.println(floatval[1]); // extra verbosity, comment later
-
         return (0==1);
     }
     else if (pr == 2)
