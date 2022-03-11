@@ -84,13 +84,14 @@ void setup()
     rover.pixy.setLED(off[0], off[1], off[2]);
     rover.clawSetPos(80); // closes claw
     // start-up lights
-
+    rover.colorSet(1, white[0], white[1], white[2]); // turn on floor-facing lights, set to white
+    delay(1500);
+    rover.colorSet(0, red[0], red[1], red[2]);
     #pragma region Print PR values
     unsigned long int min[3] = {};
     unsigned long int max[3] = {};
 
     Serial.println("Sampling light region");
-    rover.colorSet(1, white[0], white[1], white[2]);
     for (int i = 0; i<=100; i++) {
         static int L = 0;
         int L_raw = analogRead(L_PHOTORESISTOR);
@@ -118,12 +119,8 @@ void setup()
         delay(10);
     }
 
-    rover.colorSet(0, red[0], red[1], red[2]);
-    delay(1500);
+    delay(500);
     rover.colorSet(0, yellow[0], yellow[1], yellow[2]);
-    delay(1500);
-    rover.colorSet(0, green[0], green[1], green[2]);
-    delay(1500);
 
     Serial.println("Sampling dark region");
     rover.colorSet(1, white[0], white[1], white[2]);
@@ -174,10 +171,10 @@ void setup()
     }
     rover.calibrate(min, max);
     #pragma endregion
+    rover.colorSet(0, green[0], green[1], green[2]);
     delay(3000); // uncomment this line to make 5 seconds of delay once testing on track
     Serial.print("Engaging line following mode (Startup)\n");
     lineFollowing = true;
-    rover.colorSet(1, white[0], white[1], white[2]); // turn on floor-facing lights, set to white
 }
 
 void loop()
