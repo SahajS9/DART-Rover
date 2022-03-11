@@ -55,7 +55,7 @@ const int magenta[3] = {255, 0, 255};
 const int off[3] = {0, 0, 0};
 
 // misc for logics
-int i;
+// int i;
 int timer;
 bool finished1 = false; // represents different phases of course
 bool finished2 = false;
@@ -173,7 +173,7 @@ void setup()
         Serial.print(max[i]);
         Serial.print(' ');
     }
-
+    rover.calibrate(min, max);
     #pragma endregion
     delay(3000); // uncomment this line to make 5 seconds of delay once testing on track
     Serial.print("Engaging line following mode (Startup)\n");
@@ -196,7 +196,7 @@ void loop()
     }
     if (finished2 == true) // when rover has finished second part of line following
     {
-        for (int stopped = 0; i <= 0; i++)
+        for (int stopped = 0; stopped <= 0; stopped++)
         {
             rover.colorSet(1, off[0], off[1], off[2]); // floor lights off
             rover.motorSet(0);
@@ -324,12 +324,6 @@ void loop()
                 turningRight = false;
                 turningLeftMore = false;
                 turningRightMore = false;
-                int L_raw = analogRead(L_PHOTORESISTOR);
-                int M_raw = analogRead(M_PHOTORESISTOR);
-                int R_raw = analogRead(R_PHOTORESISTOR);
-                Serial.println(L_raw);
-                Serial.println(M_raw);
-                Serial.println(R_raw);
                 rover.colorFlash(0, yellow[0], yellow[1], yellow[2], 125);
                 delay(125);
             }
@@ -346,12 +340,6 @@ void loop()
             Serial.println("All PRs have low signal, stopping");
             rover.motorSet(0);
             rover.steerStraight();
-            int L_raw = analogRead(L_PHOTORESISTOR);
-            int M_raw = analogRead(M_PHOTORESISTOR);
-            int R_raw = analogRead(R_PHOTORESISTOR);
-            Serial.println(L_raw);
-            Serial.println(M_raw);
-            Serial.println(R_raw);
             rover.colorFlash(0, blue[0], blue[1], blue[2], 125);
             delay(125);
 
@@ -391,7 +379,7 @@ void loop()
             Serial.println("Detected signature, but not off the line yet");
             return;
         }
-        for (i = 0; i < rover.pixy.ccc.numBlocks; i++)
+        for (int i = 0; i < rover.pixy.ccc.numBlocks; i++)
         {
             if (rover.pixy.ccc.blocks[i].m_height >= 2 || rover.pixy.ccc.blocks[i].m_width >= 2) // temporarily set as an arbitrary value, needs to be whatever size is once reached end of line, this is to avoid false positives
             {
@@ -420,7 +408,7 @@ void loop()
         {
             return;
         }
-        for (i = 0; i < rover.pixy.ccc.numBlocks; i++)
+        for (int i = 0; i < rover.pixy.ccc.numBlocks; i++)
         {
             int block_x = rover.pixy.ccc.blocks[i].m_x;
             int block_y = rover.pixy.ccc.blocks[i].m_y;

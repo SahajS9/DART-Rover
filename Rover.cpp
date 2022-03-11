@@ -75,9 +75,11 @@ void Rover::begin()
     pinMode(_LED1_B, OUTPUT);
 };
 
-void Rover::calibrate(int min[3], int max[3]){
-    _min[3] = (float)min[3];
-    _max[3] = (float)max[3];
+void Rover::calibrate(unsigned long int min[3], unsigned long int max[3]){
+    for (int i = 0; i<=2; i++){
+        _min[i] = min[i];
+        _max[i] = max[i];
+    };
 };
 #pragma endregion
 
@@ -108,7 +110,7 @@ bool Rover::isOffLine(int pr)
         int M_raw = analogRead(_M_PHOTORESISTOR);
         val[1] = ((val[1] * 3) + M_raw) / 4;
         floatval[1] = val[1]*(1/((float)_max[1] - (float)_min[1])) - (float)_min[1]*(1/((float)_max[1] - (float)_min[1]));
-        Serial.println(floatval[1]); // extra verbosity, comment later
+        Serial.print(floatval[1]); Serial.print("\n"); // extra verbosity, comment later
 
         return (floatval[1] < 300);
     }
