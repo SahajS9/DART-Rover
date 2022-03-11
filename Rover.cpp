@@ -98,7 +98,7 @@ bool Rover::isOffLine(int pr)
         val[0] = 0;
         int L_raw = analogRead(_L_PHOTORESISTOR);
         val[0] = ((val[0] * 3) + L_raw) / 4;
-        floatval[0] = val[0]*(1/(_max[0] - _min[0])) - _min[0]*(1/(_max[0] - _min[0]));
+        floatval[0] = val[0]*(1/((float)_max[0] - (float)_min[0])) - (float)_min[0]*(1/((float)_max[0] - (float)_min[0]));
         
         return (floatval[0] < 300);
     }
@@ -107,7 +107,7 @@ bool Rover::isOffLine(int pr)
         val[1] = 0;
         int M_raw = analogRead(_M_PHOTORESISTOR);
         val[1] = ((val[1] * 3) + M_raw) / 4;
-        floatval[1] = val[1]*(1/(_max[1] - _min[1])) - _min[1]*(1/(_max[1] - _min[1]));
+        floatval[1] = val[1]*(1/((float)_max[1] - (float)_min[1])) - (float)_min[1]*(1/((float)_max[1] - (float)_min[1]));
         
         return (floatval[1] < 300);
     }
@@ -116,7 +116,7 @@ bool Rover::isOffLine(int pr)
         val[2] = 0;
         int R_raw = analogRead(_R_PHOTORESISTOR);
         val[2] = ((val[2] * 3) + R_raw) / 4;
-        floatval[2] = val[2]*(1/(_max[2] - _min[2])) - _min[2]*(1/(_max[2] - _min[2]));
+        floatval[2] = val[2]*(1/((float)_max[2] - (float)_min[2])) - (float)_min[2]*(1/((float)_max[2] - (float)_min[2]));
         
         return (floatval[2] < 300);
     }
