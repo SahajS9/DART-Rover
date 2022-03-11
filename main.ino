@@ -43,7 +43,7 @@ Rover rover(
     LED1_B);
 
 // debug mode
-bool debug = true;
+bool debug = false;
 
 // led colors
 const int white[3] = {255, 255, 255};
@@ -69,7 +69,7 @@ bool locatingTarget = false; // mode 2
 bool alignedWithTarget = false;
 char lastLineLocation = ' '; // L = left, R = right | memory to remember where line was if lost
 const int slowSpeed1 = 30;
-const int slowSpeed2 = 35;
+const int slowSpeed2 = 35;  // min speed is probably 30
 const int turnRadius1 = 12;         // smaller turn radius
 const int turnRadius2 = 14;         // larger turn radius
 const int timeUntilOffTrack = 1000; // time until all PRs being high to think line has stopped
@@ -356,6 +356,7 @@ void loop()
         rover.pixy.ccc.getBlocks();
         if (!rover.pixy.ccc.numBlocks)
         {
+            // tilts camera to find signature if not found
             for (int y = 1000; y > 0; y--)
             {
                 rover.pixy.ccc.getBlocks();
@@ -369,11 +370,6 @@ void loop()
                 rover.pixy.setServos(0, y);
             }
             return; // exits loop here if still no blocks detected
-        }
-        if (!(rover.isOffLine(0) == true && rover.isOffLine(1) == true && rover.isOffLine(2) == true))
-        {
-            Serial.println("Detected signature, but not off the line yet");
-            return;
         }
         for (int i = 0; i < rover.pixy.ccc.numBlocks; i++)
         {
@@ -404,6 +400,9 @@ void loop()
         {
             return;
         }
+        rover.motorSet(slowSpeed2); // small boost to get rover to overcome moment of inertia
+        delay(50);
+        rover.motorSet(slowSpeed1);
         for (int i = 0; i < rover.pixy.ccc.numBlocks; i++)
         {
             int block_x = rover.pixy.ccc.blocks[i].m_x;

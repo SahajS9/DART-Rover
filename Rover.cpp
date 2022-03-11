@@ -197,7 +197,7 @@ void Rover::motorSet(int speed)
     speed = (speed * 0.9) + 90;
     _motor.write(speed);
     Serial.print("Speed set to ");
-    Serial.print(speed);
+    Serial.print((speed - 90) / 0.9);
     Serial.print("\n");
 };
 #pragma endregion
