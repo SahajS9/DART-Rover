@@ -69,8 +69,8 @@ bool lineFollowing = false;  // mode 1
 bool locatingTarget = false; // mode 2
 bool alignedWithTarget = false;
 char lastLineLocation = ' '; // L = left, R = right | memory to remember where line was if lost
-const int slowSpeed1 = 20;
-const int slowSpeed2 = 25;
+const int slowSpeed1 = 30;
+const int slowSpeed2 = 35;
 const int turnRadius1 = 12;         // smaller turn radius
 const int turnRadius2 = 14;         // larger turn radius
 const int timeUntilOffTrack = 1000; // time until all PRs being high to think line has stopped
@@ -101,17 +101,17 @@ void setup()
     static int L = 0;
     int L_raw = analogRead(L_PHOTORESISTOR);
     L = ((L * 3) + L_raw) / 4;
-    Serial.println(L);
+    Serial.println(L_raw);
 
     static int M = 0;
     int M_raw = analogRead(M_PHOTORESISTOR);
     M = ((M * 3) + M_raw) / 4;
-    Serial.println(M);
+    Serial.println(M_raw);
 
     static int R = 0;
     int R_raw = analogRead(R_PHOTORESISTOR);
     R = ((R * 3) + R_raw) / 4;
-    Serial.println(R);
+    Serial.println(R_raw);
 #pragma endregion
 }
 
@@ -162,6 +162,8 @@ void loop()
                 turningStraight = true;
                 turningLeft = false;
                 turningRight = false;
+                turningLeftMore = false;
+                turningRightMore = false;
             }
         }
 
@@ -172,6 +174,7 @@ void loop()
             if (turningLeft == false)
             {
                 rover.steerLeft(turnRadius1);
+                rover.motorSet(slowSpeed2);
                 Serial.println("Middle and left PR has low signal, turning left");
                 rover.colorSet(0, red[0], red[1], red[2]);
                 lastLineLocation = 'L';
@@ -188,6 +191,7 @@ void loop()
             if (turningRight == false)
             {
                 rover.steerRight(turnRadius1);
+                rover.motorSet(slowSpeed2);
                 rover.colorSet(0, green[0], green[1], green[2]);
                 Serial.println("Middle and right PR has low signal, turning right");
                 lastLineLocation = 'R';
@@ -252,10 +256,14 @@ void loop()
                 turningStraight = false;
                 turningLeft = false;
                 turningRight = false;
-                rover.colorFlash(0, yellow[0], yellow[1], yellow[2], 125);
-                delay(125);
-                rover.colorFlash(0, yellow[0], yellow[1], yellow[2], 125);
-                delay(125);
+                turningLeftMore = false;
+                turningRightMore = false;
+                int L_raw = analogRead(L_PHOTORESISTOR);
+                int M_raw = analogRead(M_PHOTORESISTOR);
+                int R_raw = analogRead(R_PHOTORESISTOR);
+                Serial.println(L_raw);
+                Serial.println(M_raw);
+                Serial.println(R_raw);
                 rover.colorFlash(0, yellow[0], yellow[1], yellow[2], 125);
                 delay(125);
             }
@@ -272,12 +280,15 @@ void loop()
             Serial.println("All PRs have low signal, stopping");
             rover.motorSet(0);
             rover.steerStraight();
+            int L_raw = analogRead(L_PHOTORESISTOR);
+            int M_raw = analogRead(M_PHOTORESISTOR);
+            int R_raw = analogRead(R_PHOTORESISTOR);
+            Serial.println(L_raw);
+            Serial.println(M_raw);
+            Serial.println(R_raw);
             rover.colorFlash(0, blue[0], blue[1], blue[2], 125);
             delay(125);
-            rover.colorFlash(0, blue[0], blue[1], blue[2], 125);
-            delay(125);
-            rover.colorFlash(0, blue[0], blue[1], blue[2], 125);
-            delay(125);
+            
             return;
         }
     }
