@@ -229,6 +229,7 @@ void loop()
                 rover.steerStraight();
                 Serial.println("On-course, going straight");
                 rover.colorSet(0, off[0], off[1], off[2]);
+                lastLineLocation = 'C';
                 turningStraight = true;
                 turningLeft = false;
                 turningRight = false;
@@ -339,63 +340,78 @@ void loop()
             return;
         }
         // All photoresistors above threshold (off line)
-        // if all 3 PRs are high, rover is completely off-track, go backwards to try and find it again, if its not found, rover is offTrack
+        // if all 3 PRs are high, rover is completely off-track
+        // start a timer while off track, slow down
+        // if time elapsed greater than timeUntilOffTrack, start reversing
+        // while reversing, steer in the direction the line was last in (L = R, R = L)
+        //   also count until we've exceeded time elapsed off the track and then some
+        // if the above is exceeded, i.e. we couldn't find the line again, then stop and consider rover to be offTrack
+        // when offTrack is true, this condition shouldn't be reached so PixyCam logic can start
         if ((rover.isOffLine(0) == true && rover.isOffLine(1) == true && rover.isOffLine(2) == true) && offTrack == false)
         {
-            // if more than one second has passed since reversing \/
-            if (timer1 >= timeUntilOffTrack)
+            if (timer1 < timeUntilOffTrack)
             {
-                offTrack = true;
-                rover.motorSet(0);
-                rover.steerStraight();
+                timer1++; // count up in time
+                delay(1);
                 return;
             }
-            timer1++; // counts up each loop so if rover off track for more than one second, stop
-            delay(1);
-            if (reversing == false)
-            {
-                rover.motorSet(slowSpeed1);
-            }
-            else if ((rover.isOffLine(0) == true && rover.isOffLine(1) == true && rover.isOffLine(2) == true))
-            {
-                rover.motorSet(0);
-                delay(50);
-                Serial.println("All PRs had high signal for two seconds, reversing to relocate track");
-                rover.colorFlash(0, yellow[0], yellow[1], yellow[2], 125);
-                delay(125);
-                int timer2 = 0;
-                while (!(rover.isOffLine(0) == true && rover.isOffLine(1) == false && rover.isOffLine(2) == true) && timer2 > timer1 + 1000)
-                {
-                    timer2++;
-                    delay(1);
-                    turningStraight = false;
-                    turningLeft = false;
-                    turningRight = false;
-                    turningLeftMore = false;
-                    turningRightMore = false;
-                    reversing = true;
-                    errored = false;
-                    rover.motorSet(reverseSpeed1);
-                    if (lastLineLocation == 'L')
-                    {
-                        rover.steerRight(turnRadius1);
-                    }
-                    if (lastLineLocation == 'R')
-                    {
-                        rover.steerLeft(turnRadius1);
-                    }
-                }
-                if (timer2 > timer1 + 1000)
-                {
-                    rover.motorSet(0);
-                    delay(50);
-                    rover.motorSet(slowSpeed2);
-                    return;
-                }
-            }
+            // if more than timeUntilOffTrack has passed
             else
             {
-                reversing = true;
+                rover.motorSet(0);
+                rover.steerStraight();
+                delay(50);
+                Serial.println("All PRs had high signal for too long, stopping and reversing to relocate track");
+                rover.colorFlash(0, yellow[0], yellow[1], yellow[2], 125);
+                delay(125);
+                // int timer2 = 0;
+                bool alreadyReversing = false;
+                bool stopReversing = false;
+                // while loop to reverse until back on line or exceeded elapsed time + one second
+                while (!(rover.isOffLine(0) == true && rover.isOffLine(1) == false && rover.isOffLine(2) == true))
+                {
+                    for (int timer2 = 0; timer2 < (timer1 + 1000); timer2++)
+                    {
+                        if (alreadyReversing == false && stopReversing == false)
+                        {
+                            alreadyReversing = true;
+                            rover.motorSet(reverseSpeed1);
+                            if (lastLineLocation == 'L')
+                            {
+                                rover.steerRight(turnRadius1);
+                            }
+                            if (lastLineLocation == 'R')
+                            {
+                                rover.steerLeft(turnRadius1);
+                            }
+                            if (lastLineLocation == 'C')
+                            {
+                                rover.steerStraight();
+                            }
+                        }
+                        delay(1);
+                        if ((rover.isOffLine(0) == true && rover.isOffLine(1) == false && rover.isOffLine(2) == true) && stopReversing == false)
+                        {
+                            stopReversing = true;
+                            alreadyReversing = false;
+                        }
+                        else if (alreadyReversing == true)
+                        {
+                            return;
+                        }
+                        else if (stopReversing == true)
+                        {
+                            return;
+                        }
+                    }
+                        // if exceeded time, stopReversing would be true, else we stop
+                    if (stopReversing == false)
+                    {
+                        rover.motorSet(0);
+                        offTrack = true; // this should only happen if we reversed and it failed, so we are now off track
+                        return;
+                    }
+                }
             }
         }
         else

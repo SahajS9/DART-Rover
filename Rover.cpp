@@ -216,7 +216,7 @@ void Rover::clawSet(bool status)
         for (pos = 80; pos >= 0; pos -= 1)
         {
             _smallservo.write(pos);
-            delay(30);
+            delay(50);
         }
     }
     else
@@ -225,7 +225,7 @@ void Rover::clawSet(bool status)
         for (pos = 0; pos <= 50; pos += 1)
         {
             _smallservo.write(pos);
-            delay(30);
+            delay(50);
         }
     }
 };
