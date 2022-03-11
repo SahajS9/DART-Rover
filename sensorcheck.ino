@@ -83,28 +83,21 @@ void loop()
       // Serial.print("    R = ");
       // Serial.print(analogRead(R_PHOTORESISTOR));
       // Serial.print("\n");
-    Serial.print(analogRead(L_PHOTORESISTOR));
-    Serial.print(" ");
-    Serial.print(analogRead(M_PHOTORESISTOR));
-    Serial.print(" ");
-    Serial.print(analogRead(R_PHOTORESISTOR));
+  static int L = 0;
+  int L_raw = analogRead(L_PHOTORESISTOR);
+  L = ((L * 3) + L_raw) / 4;
+  Serial.print(L);
+  Serial.print(' ');
 
-    if (runOnce == true)
-    {
-        rover.clawSet(false);
-        delay(1000);
-        rover.clawSet(true);  
-        delay(5000);
-        rover.motorSet(10);
-        delay(3000);
-        rover.motorSet(50);
-        delay(3000);
-        rover.motorSet(100);
-        delay(10000);
+  static int M = 0;
+  int M_raw = analogRead(M_PHOTORESISTOR);
+  M = ((M * 3) + M_raw) / 4;
+  Serial.print(M);
+  Serial.print(' ');
 
-        runOnce = false;
-    }
-
-    Serial.println("-------"); // indicates reached end of loop
-    Serial.println("");        // spacer
+  static int R = 0;
+  int R_raw = analogRead(R_PHOTORESISTOR);
+  R = ((R * 3) + R_raw) / 4;
+  Serial.print(R);
+  Serial.print(' ');
 }
