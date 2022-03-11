@@ -348,25 +348,34 @@ void loop()
                 offTrack = true;
                 rover.motorSet(0);
                 rover.steerStraight();
+                return;
+            }
+            timer1++; // counts up each loop so if rover off track for more than one second, stop
+            delay(1);
+            if (reversing == false)
+            {
+                rover.motorSet(slowSpeed1);
             }
             else if ((rover.isOffLine(0) == true && rover.isOffLine(1) == true && rover.isOffLine(2) == true))
             {
                 rover.motorSet(0);
                 delay(50);
-                Serial.println("All PRs had high signal for one second, reversing to relocate track");
-                turningStraight = false;
-                turningLeft = false;
-                turningRight = false;
-                turningLeftMore = false;
-                turningRightMore = false;
-                // reversing = true;
-                errored = false;
+                Serial.println("All PRs had high signal for two seconds, reversing to relocate track");
                 rover.colorFlash(0, yellow[0], yellow[1], yellow[2], 125);
                 delay(125);
-                while (!(rover.isOffLine(0) == true && rover.isOffLine(1) == false && rover.isOffLine(2) == true))
+                int timer2 = 0;
+                while (!(rover.isOffLine(0) == true && rover.isOffLine(1) == false && rover.isOffLine(2) == true) && timer2 > timer1 + 1000)
                 {
+                    timer2++;
+                    delay(1);
+                    turningStraight = false;
+                    turningLeft = false;
+                    turningRight = false;
+                    turningLeftMore = false;
+                    turningRightMore = false;
+                    reversing = true;
+                    errored = false;
                     rover.motorSet(reverseSpeed1);
-                    delay(50);
                     if (lastLineLocation == 'L')
                     {
                         rover.steerRight(turnRadius1);
@@ -376,12 +385,17 @@ void loop()
                         rover.steerLeft(turnRadius1);
                     }
                 }
+                if (timer2 > timer1 + 1000)
+                {
+                    rover.motorSet(0);
+                    delay(50);
+                    rover.motorSet(slowSpeed2);
+                    return;
+                }
             }
             else
             {
-                rover.motorSet(slowSpeed1);
-                timer1++; // counts up each loop so if rover off track for more than one second, stop
-                delay(1);
+                reversing = true;
             }
         }
         else
