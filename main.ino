@@ -50,7 +50,7 @@ const int white[3] = {255, 255, 255};
 const int red[3] = {255, 0, 0};
 const int green[3] = {0, 255, 0};
 const int blue[3] = {0, 0, 255};
-const int yellow[3] = {255, 180, 0};
+const int yellow[3] = {255, 255, 0};
 const int magenta[3] = {255, 0, 255};
 const int off[3] = {0, 0, 0};
 
@@ -337,7 +337,7 @@ void loop()
             timer = 0; // resets timer if back on line or some other condition
         }
 
-        // All photoresistors below threshold
+        // All photoresistors below threshold (error state)
         // this case and two side PRs being dark is also possible, but it doesn't really matter (yet) (tm)
         while (rover.isOffLine(0) == false && rover.isOffLine(2) == false && rover.isOffLine(1) == false)
         {
@@ -352,7 +352,7 @@ void loop()
             Serial.println(R_raw);
             rover.colorFlash(0, blue[0], blue[1], blue[2], 125);
             delay(125);
-            
+
             return;
         }
     }
@@ -367,11 +367,22 @@ void loop()
 #pragma region Signature Detection(Transition)
     if (locatingTarget == false && offTrack == true)
     {
-        // Serial.println("Checking for signatures");
         rover.pixy.ccc.getBlocks();
         if (!rover.pixy.ccc.numBlocks)
         {
-            return; // exits loop here if no blocks detected, else continues
+            for (int y = 1000; y > 0; y--)
+            {
+                rover.pixy.ccc.getBlocks();
+                if (rover.pixy.ccc.numBlocks)
+                {
+                    y = 0;
+                    Serial.println("Tilting camera");
+                    delay(100);
+                    return; // exits loop if block detected and stops it
+                }
+                rover.pixy.setServos(0, y);
+            }
+            return; // exits loop here if still no blocks detected
         }
         if (!(rover.isOffLine(0) == true && rover.isOffLine(1) == true && rover.isOffLine(2) == true))
         {
@@ -382,6 +393,7 @@ void loop()
         {
             if (rover.pixy.ccc.blocks[i].m_height >= 2 || rover.pixy.ccc.blocks[i].m_width >= 2) // temporarily set as an arbitrary value, needs to be whatever size is once reached end of line, this is to avoid false positives
             {
+                rover.motorSet(0);
                 Serial.println("Detected target while off track, switching to target locating mode");
                 lineFollowing = false;
                 locatingTarget = true;
@@ -408,29 +420,37 @@ void loop()
         }
         for (i = 0; i < rover.pixy.ccc.numBlocks; i++)
         {
+            int block_x = rover.pixy.ccc.blocks[i].m_x;
+            int block_y = rover.pixy.ccc.blocks[i].m_y;
             if (debug == true)
             {
                 rover.pixy.ccc.blocks[i].print(); // debug print block info
             }
-            // if (rover.pixy.ccc.blocks[i].m_age < 60)
-            // {
-            //     Serial.println("Ignored young block");
-            //     return; // exits loop if block isn't older than 60 frames (60fps, so 1 sec) (likely a false positive)
-            // }
-            // x coord goes from 0 to 316, middle is 158, so center region is about from 148 to 168
-            if (rover.pixy.ccc.blocks[i].m_x < 148) // turn left until center if target is on left side
+            // x coord goes from 1 to 316, middle is 158, so center region is about from 148 to 168
+            if (block_x < 148) // turn left until center if target is on left side
             {
                 rover.motorSet(slowSpeed2);
                 rover.steerLeft(turnRadius1);
                 Serial.println("Turning left to align to target");
                 alignedWithTarget = false;
             }
-            else if (rover.pixy.ccc.blocks[i].m_x > 168) // turn right until center if target is on right side
+            else if (block_x > 168) // turn right until center if target is on right side
             {
                 rover.motorSet(slowSpeed2);
                 rover.steerRight(turnRadius1);
                 Serial.println("Turning right to align to target");
                 alignedWithTarget = false;
+            }
+            // y coord goes from 1 to 208, middle is 104, so center region is about from 94 to 114
+            // formula to scale center coord (x) to camera tilt degrees (y) => y = 0.207*x+1
+            int degreesOfChange = 0.207 * block_y + 1;
+            if (block_y < 94) // tilt camera down for better vision if below middle of image
+            {
+                rover.pixy.setServos(0, degreesOfChange);
+            }
+            else if (block_y > 114) // tilt camera up for better vision if above middle of image
+            {
+                rover.pixy.setServos(0, degreesOfChange);
             }
             else
             {
@@ -439,11 +459,11 @@ void loop()
                 alignedWithTarget = true;
                 Serial.println("Aligned with target");
             }
-            if (rover.pixy.ccc.blocks[i].m_width >= 230 && alignedWithTarget == true) // once close enough, stop and grab it
+            if (rover.pixy.ccc.blocks[i].m_width >= 200 && alignedWithTarget == true) // once close enough, stop and grab it
             {
-                Serial.println("Target is aligned and within reach, grabbing");
                 rover.motorSet(0);
-                delay(100);
+                Serial.println("Target is aligned and within reach, grabbing");
+                delay(125);
                 rover.colorFlash(0, green[0], green[1], green[2], 125);
                 delay(125);
                 rover.colorFlash(0, magenta[0], magenta[1], magenta[2], 125);
