@@ -85,36 +85,37 @@ void Rover::begin()
  **/
 int Rover::isOffLine()
 {
-    int val[3];
+    static int val[3];
+    float floatval[3];
     const int min[3] = {161, 150, 155};
     const int max[3] = {460, 420, 340};
 
-    static int val[0] = 0;
-    int L_raw = analogRead(_L_PHOTORESISTOR);
+    val[0] = 0;
+    int L_raw = analogRead(L_PHOTORESISTOR);
     val[0] = ((val[0] * 3) + L_raw) / 4;
-    val[0] = val[0]*(max[0] - min[0]) + min[0]
+    floatval[0] = val[0]*(1/(max[0] - min[0])) - min[0]*(1/(max[0] - min[0]));
 
-    static int val[1] = 0;
-    int M_raw = analogRead(_M_PHOTORESISTOR);
+    val[1] = 0;
+    int M_raw = analogRead(M_PHOTORESISTOR);
     val[1] = ((val[1] * 3) + M_raw) / 4;
-    val[1] = val[1]*(max[0] - min[0]) + min[0]
+    floatval[1] = val[1]*(1/(max[1] - min[1])) - min[1]*(1/(max[1] - min[1]));
 
-    static int R = 0;
-    int R_raw = analogRead(_R_PHOTORESISTOR);
+    val[2] = 0;
+    int R_raw = analogRead(R_PHOTORESISTOR);
     val[2] = ((val[2] * 3) + R_raw) / 4;
-    val[2] = val[2]*(max[0] - min[0]) + min[0]
+    floatval[2] = val[2]*(1/(max[2] - min[2])) - min[2]*(1/(max[2] - min[2]));
 
     int condition[3];
     // Condition 0 = white
     // Condition 1 = grey (fading between white and black)
     // Condition 2 = black
-    for (i=0, i<=3, i++){
-        if (val[i] <= 0.2) {
-            condition[i] = 0
-        } else if (val[i] > 0.2 && val[i] < 0.8) {
-            condition[i] = 1
-        } else if (val[i] > 0.8) {
-            condition[i] = 2
+    for (int i=0; i<=2; i++){
+        if (floatval[i] <= 0.2) {
+            condition[i] = 0;
+        } else if (floatval[i] > 0.2 && val[i] < 0.8) {
+            condition[i] = 1;
+        } else if (floatval[i] > 0.8) {
+            condition[i] = 2;
         }
     }
 
