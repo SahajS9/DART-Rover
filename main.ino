@@ -55,7 +55,6 @@ const int magenta[3] = {255, 0, 255};
 const int off[3] = {0, 0, 0};
 
 // misc for logics
-// int i;
 int timer;
 bool finished1 = false; // represents different phases of course
 bool finished2 = false;
