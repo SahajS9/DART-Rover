@@ -58,7 +58,7 @@ class Rover
 
         //photoresistor logic
 
-        int isOffLine();
+        int isOffLine(int pr);
         //led controls
         void colorSet(int group, int R, int G, int B);
         void colorFlash(int group, int R, int G, int B, int delay);

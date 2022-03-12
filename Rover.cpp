@@ -1,8 +1,9 @@
-#include <Arduino.h>   
+#include <Arduino.h>
 #include <SPI.h>
 #include <Pixy2.h>
 #include <Servo.h>
 #include "Rover.h"
+
 // steering constant as calibrated to be cardinal and centered
 const int steeringAlignment = 92;
 
@@ -74,8 +75,10 @@ void Rover::begin()
     pinMode(_LED1_B, OUTPUT);
 };
 
-void Rover::calibrate(unsigned long int min[3], unsigned long int max[3]){
-    for (int i = 0; i<=2; i++){
+void Rover::calibrate(unsigned long int min[3], unsigned long int max[3])
+{
+    for (int i = 0; i <= 2; i++)
+    {
         _min[i] = min[i];
         _max[i] = max[i];
     };
@@ -89,27 +92,31 @@ void Rover::calibrate(unsigned long int min[3], unsigned long int max[3]){
  * @param pr Photoresistor to check (int {0 = L, 1 = M, 2 = R})
  * @returns bool - Whether or not photoresistor has high or low signal
  **/
-int Rover::isOffLine()
+bool Rover::isOffLine(int pr)
 {
     static int val[3] = {};
     float floatval[3] = {};
 
+    const int _min[3] = {165, 127, 152};
+    const int _max[3] = {400, 300, 360};
+
     val[0] = 0;
     int L_raw = analogRead(_L_PHOTORESISTOR);
     val[0] = ((val[0] * 3) + L_raw) / 4;
-    floatval[0] = val[0]*(1/((float)_max[0] - (float)_min[0])) - (float)_min[0]*(1/((float)_max[0] - (float)_min[0]));
+    floatval[0] = val[0] * (1 / ((float)_max[0] - (float)_min[0])) + (float)_min[0] * (1 / ((float)_max[0] - (float)_min[0]));
 
     val[1] = 0;
     int M_raw = analogRead(_M_PHOTORESISTOR);
     val[1] = ((val[1] * 3) + M_raw) / 4;
-    floatval[1] = val[1]*(1/((float)_max[1] - (float)_min[1])) - (float)_min[1]*(1/((float)_max[1] - (float)_min[1]));
+    floatval[1] = val[1] * (1 / ((float)_max[1] - (float)_min[1])) + (float)_min[1] * (1 / ((float)_max[1] - (float)_min[1]));
 
     val[2] = 0;
     int R_raw = analogRead(_R_PHOTORESISTOR);
     val[2] = ((val[2] * 3) + R_raw) / 4;
-    floatval[2] = val[2]*(1/((float)_max[2] - (float)_min[2])) - (float)_min[2]*(1/((float)_max[2] - (float)_min[2]));
+    floatval[2] = val[2] * (1 / ((float)_max[2] - (float)_min[2])) + (float)_min[2] * (1 / ((float)_max[2] - (float)_min[2]));
 
-    for (int i=0; i<=2; i++) {
+    for (int i = 0; i <= 2; i++)
+    {
         Serial.print(floatval[i]);
         Serial.print(' ');
     }
@@ -117,113 +124,25 @@ int Rover::isOffLine()
 
     if (pr == 0)
     {
-        return (0);
+        return (floatval[0] < 1);
     }
-    else if (L > 190 && L <= 210)
+    else if (pr == 1)
     {
-
-        L_condition = 1;
-
+        return (floatval[1] < 1);
     }
-    else if (L > 210)
+    else if (pr == 2)
     {
-        L_condition = 2;
-    }
-
-    if (M <= 170)
-    {
-        M_condition = 0;
-    }
-    else if (M > 170 && M <= 320)
-    {
-        M_condition = 1;
-    }
-    else if (M > 320)
-    {
-        M_condition = 2;
-    }
-
-    if (R <= 180)
-    {
-        R_condition = 0;
-    }
-    else if (R > 180 && R <= 240)
-    {
-        R_condition = 1;
-    }
-    else if (R > 240)
-    {
-        R_condition = 2;
-    }
-
-    // case 0 = All white
-    // case 1 = All black
-    // case 2 = Maintain course
-    // case 3 = Left Small
-    // case 4 = Left Big
-    // case 5 = Right Small
-    // case 6 = Right Big
-
-    // All white
-    if (
-        L_condition == 0 &&
-        M_condition == 0 &&
-        R_condition == 0)
-    {
-        return 0;
-    }
-    // Maintain course
-    else if (
-        L_condition == 0 &&
-        M_condition != 0 &&
-        R_condition == 0)
-    {
-        return 2;
-    }
-    // Left Small
-    else if (
-        L_condition == 0 &&
-        M_condition == 1 &&
-        R_condition != 0)
-    {
-        return 3;
-    }
-    // Left Big
-    else if (
-        L_condition == 0 &&
-        M_condition == 0 &&
-        R_condition != 1)
-    {
-        return 4;
-    }
-    // Right Small
-    else if (
-        L_condition != 0 &&
-        M_condition == 1 &&
-        R_condition == 0)
-    {
-        return 5;
-    }
-    // Right Big
-    else if (
-        L_condition != 0 &&
-        M_condition == 0 &&
-        R_condition == 1)
-    {
-        return 6;
-    }
-    // All black (error)
-    else if (
-        L_condition != 0 &&
-        M_condition != 0 &&
-        R_condition != 0)
-    {
-        return 1;
+        return (floatval[2] < 1);
     }
     else
     {
-        return 1;
+        return false;
     }
+
+    // SHARPIE LINE = L560 M370 R420
+    // PRINTER PAPER = L300 M200 R270
+    // TRACK = L500 M400 R350
+    // BRANDYWINE @ 6:30 = 700 300 550
 }
 #pragma endregion
 
@@ -300,16 +219,16 @@ void Rover::clawSet(bool status)
         for (pos = 80; pos >= 0; pos -= 1)
         {
             _smallservo.write(pos);
-            delay(30);
+            delay(50);
         }
     }
     else
     {
         Serial.print("Closing claw");
-        for (pos = 0; pos <= 60; pos += 1)
+        for (pos = 0; pos <= 50; pos += 1)
         {
             _smallservo.write(pos);
-            delay(30);
+            delay(50);
         }
     }
 };
