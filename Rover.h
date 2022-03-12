@@ -57,8 +57,8 @@ class Rover
         void motorSet(int speed);
 
         //photoresistor logic
-        // photoresistor logic - true = high, false = low
-        bool isOffLine(int pr);
+
+        int isOffLine();
         //led controls
         void colorSet(int group, int R, int G, int B);
         void colorFlash(int group, int R, int G, int B, int delay);

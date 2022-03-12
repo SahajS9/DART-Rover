@@ -76,7 +76,6 @@ const int reverseSpeed1 = -35;
 const int turnRadius1 = 15;         // smaller turn radius
 const int turnRadius2 = 24;         // larger turn radius
 const int timeUntilOffTrack = 2000; // time(ms) until all PRs being high to think line has stopped
-
 void setup()
 {
     rover.begin();
@@ -219,11 +218,19 @@ void loop()
 #pragma endregion
 
 #pragma region Line Follow Logic
+    // case 0 = All white
+    // case 1 = All black
+    // case 2 = Maintain course
+    // case 3 = Left Small
+    // case 4 = Left Big
+    // case 5 = Right Small
+    // case 6 = Right Big
     if (lineFollowing == true)
     {
-        // Rover on track, mantain course
-        while (rover.isOffLine(0) == true && rover.isOffLine(1) == false && rover.isOffLine(2) == true)
+        switch (rover.isOffLine())
         {
+        case 2:
+            // Rover on track, maintain course
             if (turningStraight == false)
             {
                 rover.motorSet(slowSpeed2);
@@ -239,12 +246,11 @@ void loop()
                 reversing = false;
                 errored = false;
             }
-        }
+            break;
 
-        // when starting to veer off, but not nearly completely off yet
-        // if middle PR and left PR gets high signal
-        while (rover.isOffLine(0) == false && rover.isOffLine(1) == false && rover.isOffLine(2) == true)
-        {
+        // case 3 and 5 is when starting to veer off, but not nearly completely off yet
+        case 3:
+            // if middle PR and left PR gets high signal
             if (turningLeft == false)
             {
                 rover.steerLeft(turnRadius1);
@@ -260,10 +266,8 @@ void loop()
                 reversing = false;
                 errored = false;
             }
-        }
         // if middle PR and right PR gets high signal
-        while (rover.isOffLine(0) == true && rover.isOffLine(1) == false && rover.isOffLine(2) == false)
-        {
+        case 5:
             if (turningRight == false)
             {
                 rover.motorSet(slowSpeed1);
@@ -279,12 +283,11 @@ void loop()
                 reversing = false;
                 errored = false;
             }
-        }
+            break;
 
-        // only Left PR on line, turning left
-        // this means track veered more than above could account for
-        while (rover.isOffLine(0) == false && rover.isOffLine(1) == true && rover.isOffLine(2) == true)
-        {
+        // case 4 and 6 is used when track veered more than above could account for
+        case 4:
+            // only Left PR on line, turning left
             if (turningLeftMore == false)
             {
                 rover.motorSet(slowSpeed2);
@@ -300,11 +303,9 @@ void loop()
                 reversing = false;
                 errored = false;
             }
-        }
-        // only right PR on line, turning right
-        // this means track veered more than above could account for
-        while (rover.isOffLine(0) == true && rover.isOffLine(1) == true && rover.isOffLine(2) == false)
-        {
+            break;
+        case 6:
+            // only right PR on line, turning right
             if (turningRightMore == false)
             {
                 rover.motorSet(slowSpeed2);
@@ -320,7 +321,7 @@ void loop()
                 reversing = false;
                 errored = false;
             }
-        }
+            break;
 
         // All photoresistors below threshold (error state)
         // this case and two side PRs being dark is also possible, but it doesn't really matter (yet) (tm)

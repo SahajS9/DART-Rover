@@ -3,7 +3,6 @@
 #include <Pixy2.h>
 #include <Servo.h>
 #include "Rover.h"
-
 // steering constant as calibrated to be cardinal and centered
 const int steeringAlignment = 92;
 
@@ -90,7 +89,7 @@ void Rover::calibrate(unsigned long int min[3], unsigned long int max[3]){
  * @param pr Photoresistor to check (int {0 = L, 1 = M, 2 = R})
  * @returns bool - Whether or not photoresistor has high or low signal
  **/
-bool Rover::isOffLine(int pr)
+int Rover::isOffLine()
 {
     static int val[3] = {};
     float floatval[3] = {};
@@ -118,25 +117,113 @@ bool Rover::isOffLine(int pr)
 
     if (pr == 0)
     {
-        return (0==0);
+        return (0);
     }
-    else if (pr == 1)
+    else if (L > 190 && L <= 210)
     {
-        return (0==1);
+
+        L_condition = 1;
+
     }
-    else if (pr == 2)
+    else if (L > 210)
     {
-        return (0==0);
+        L_condition = 2;
+    }
+
+    if (M <= 170)
+    {
+        M_condition = 0;
+    }
+    else if (M > 170 && M <= 320)
+    {
+        M_condition = 1;
+    }
+    else if (M > 320)
+    {
+        M_condition = 2;
+    }
+
+    if (R <= 180)
+    {
+        R_condition = 0;
+    }
+    else if (R > 180 && R <= 240)
+    {
+        R_condition = 1;
+    }
+    else if (R > 240)
+    {
+        R_condition = 2;
+    }
+
+    // case 0 = All white
+    // case 1 = All black
+    // case 2 = Maintain course
+    // case 3 = Left Small
+    // case 4 = Left Big
+    // case 5 = Right Small
+    // case 6 = Right Big
+
+    // All white
+    if (
+        L_condition == 0 &&
+        M_condition == 0 &&
+        R_condition == 0)
+    {
+        return 0;
+    }
+    // Maintain course
+    else if (
+        L_condition == 0 &&
+        M_condition != 0 &&
+        R_condition == 0)
+    {
+        return 2;
+    }
+    // Left Small
+    else if (
+        L_condition == 0 &&
+        M_condition == 1 &&
+        R_condition != 0)
+    {
+        return 3;
+    }
+    // Left Big
+    else if (
+        L_condition == 0 &&
+        M_condition == 0 &&
+        R_condition != 1)
+    {
+        return 4;
+    }
+    // Right Small
+    else if (
+        L_condition != 0 &&
+        M_condition == 1 &&
+        R_condition == 0)
+    {
+        return 5;
+    }
+    // Right Big
+    else if (
+        L_condition != 0 &&
+        M_condition == 0 &&
+        R_condition == 1)
+    {
+        return 6;
+    }
+    // All black (error)
+    else if (
+        L_condition != 0 &&
+        M_condition != 0 &&
+        R_condition != 0)
+    {
+        return 1;
     }
     else
     {
-        return false;
+        return 1;
     }
-
-    // SHARPIE LINE = L560 M370 R420
-    // PRINTER PAPER = L300 M200 R270
-    // TRACK = L500 M400 R350
-    // BRANDYWINE @ 6:30 = 700 300 550
 }
 #pragma endregion
 
