@@ -70,12 +70,12 @@ bool lineFollowing = false;  // mode 1
 bool locatingTarget = false; // mode 2
 bool alignedWithTarget = false;
 char lastLineLocation = ' '; // L = left, R = right | memory to remember where line was if lost
-const int slowSpeed1 = 27;
-const int slowSpeed2 = 30; // min speed is probably 30
-const int reverseSpeed1 = -35;
-const int turnRadius1 = 15;         // smaller turn radius
-const int turnRadius2 = 24;         // larger turn radius
-const int timeUntilOffTrack = 2000; // time(ms) until all PRs being high to think line has stopped
+const int slowSpeed1 = 30;
+const int slowSpeed2 = 33; // min speed is probably 30
+const int reverseSpeed1 = -40;
+const int turnRadius1 = 10;        // smaller turn radius
+const int turnRadius2 = 20;        // larger turn radius
+const int timeUntilOffTrack = 500; // time(ms) until all PRs being high to think line has stopped
 
 void setup()
 {
@@ -91,93 +91,96 @@ void setup()
     rover.colorSet(0, red[0], red[1], red[2]);
     delay(1000);
 #pragma region Print PR values
-    unsigned long int min[3] = {};
-    unsigned long int max[3] = {};
-
-    Serial.println("Sampling light region");
-    for (int i = 0; i <= 100; i++)
+    if (debug == true)
     {
-        static int L = 0;
-        int L_raw = analogRead(L_PHOTORESISTOR);
-        L = ((L * 3) + L_raw) / 4;
-        min[0] += L;
+        unsigned long int min[3] = {};
+        unsigned long int max[3] = {};
 
-        static int M = 0;
-        int M_raw = analogRead(M_PHOTORESISTOR);
-        M = ((M * 3) + M_raw) / 4;
-        min[1] += M;
+        Serial.println("Sampling light region");
+        for (int i = 0; i <= 100; i++)
+        {
+            static int L = 0;
+            int L_raw = analogRead(L_PHOTORESISTOR);
+            L = ((L * 3) + L_raw) / 4;
+            min[0] += L;
 
-        static int R = 0;
-        int R_raw = analogRead(R_PHOTORESISTOR);
-        R = ((R * 3) + R_raw) / 4;
-        min[2] += R;
+            static int M = 0;
+            int M_raw = analogRead(M_PHOTORESISTOR);
+            M = ((M * 3) + M_raw) / 4;
+            min[1] += M;
 
-        Serial.print(L);
-        Serial.print(' ');
-        Serial.print(M);
-        Serial.print(' ');
-        Serial.print(R);
-        Serial.print(' ');
+            static int R = 0;
+            int R_raw = analogRead(R_PHOTORESISTOR);
+            R = ((R * 3) + R_raw) / 4;
+            min[2] += R;
+
+            Serial.print(L);
+            Serial.print(' ');
+            Serial.print(M);
+            Serial.print(' ');
+            Serial.print(R);
+            Serial.print(' ');
+            Serial.print('\n');
+
+            delay(10);
+        }
+
+        delay(3000);
+        rover.colorSet(0, yellow[0], yellow[1], yellow[2]);
+
+        Serial.println("Sampling dark region");
+        rover.colorSet(1, white[0], white[1], white[2]);
+        for (int i = 0; i <= 100; i++)
+        {
+            static int L = 0;
+            int L_raw = analogRead(L_PHOTORESISTOR);
+            L = ((L * 3) + L_raw) / 4;
+            max[0] += L;
+
+            static int M = 0;
+            int M_raw = analogRead(M_PHOTORESISTOR);
+            M = ((M * 3) + M_raw) / 4;
+            max[1] += M;
+
+            static int R = 0;
+            int R_raw = analogRead(R_PHOTORESISTOR);
+            R = ((R * 3) + R_raw) / 4;
+            max[2] += R;
+
+            Serial.print(L);
+            Serial.print(' ');
+            Serial.print(M);
+            Serial.print(' ');
+            Serial.print(R);
+            Serial.print(' ');
+            Serial.print('\n');
+
+            delay(10);
+        }
+        rover.colorSet(0, off[0], off[1], off[2]);
+
+        // debugging purposes
+        for (int i = 0; i <= 2; i++)
+        {
+            min[i] = min[i] / 100;
+            max[i] = max[i] / 100;
+        }
+
+        Serial.print("Minimums: ");
+        for (int i = 0; i <= 2; i++)
+        {
+            Serial.print(min[i]);
+            Serial.print(' ');
+        }
         Serial.print('\n');
-
-        delay(10);
+        Serial.print("Maximums: ");
+        for (int i = 0; i <= 2; i++)
+        {
+            Serial.print(max[i]);
+            Serial.print(' ');
+        }
+        rover.calibrate(min, max);
     }
-
-    delay(3000);
-    rover.colorSet(0, yellow[0], yellow[1], yellow[2]);
-
-    Serial.println("Sampling dark region");
-    rover.colorSet(1, white[0], white[1], white[2]);
-    for (int i = 0; i <= 100; i++)
-    {
-        static int L = 0;
-        int L_raw = analogRead(L_PHOTORESISTOR);
-        L = ((L * 3) + L_raw) / 4;
-        max[0] += L;
-
-        static int M = 0;
-        int M_raw = analogRead(M_PHOTORESISTOR);
-        M = ((M * 3) + M_raw) / 4;
-        max[1] += M;
-
-        static int R = 0;
-        int R_raw = analogRead(R_PHOTORESISTOR);
-        R = ((R * 3) + R_raw) / 4;
-        max[2] += R;
-
-        Serial.print(L);
-        Serial.print(' ');
-        Serial.print(M);
-        Serial.print(' ');
-        Serial.print(R);
-        Serial.print(' ');
-        Serial.print('\n');
-
-        delay(10);
-    }
-    rover.colorSet(0, off[0], off[1], off[2]);
-
-    // debugging purposes
-    for (int i = 0; i <= 2; i++)
-    {
-        min[i] = min[i] / 100;
-        max[i] = max[i] / 100;
-    }
-
-    Serial.print("Minimums: ");
-    for (int i = 0; i <= 2; i++)
-    {
-        Serial.print(min[i]);
-        Serial.print(' ');
-    }
-    Serial.print('\n');
-    Serial.print("Maximums: ");
-    for (int i = 0; i <= 2; i++)
-    {
-        Serial.print(max[i]);
-        Serial.print(' ');
-    }
-    rover.calibrate(min, max);
 #pragma endregion
     rover.colorSet(0, green[0], green[1], green[2]);
     delay(3000); // uncomment this line to make 5 seconds of delay once testing on track
@@ -289,8 +292,8 @@ void loop()
                 rover.motorSet(slowSpeed2);
                 rover.steerLeft(turnRadius2);
                 Serial.println("Low signal on left side, turning left more");
-                rover.colorSet(0, red[0], red[1], red[2]);
                 rover.colorSet(0, yellow[0], yellow[1], yellow[2]);
+                rover.colorSet(0, red[0], red[1], red[2]);
                 turningStraight = false;
                 turningLeft = false;
                 turningRight = false;
@@ -309,8 +312,8 @@ void loop()
                 rover.motorSet(slowSpeed2);
                 rover.steerRight(turnRadius2);
                 Serial.println("Low signal on right side, turning right more");
-                rover.colorSet(0, green[0], green[1], green[2]);
                 rover.colorSet(0, yellow[0], yellow[1], yellow[2]);
+                rover.colorSet(0, green[0], green[1], green[2]);
                 turningStraight = false;
                 turningLeft = false;
                 turningRight = false;
@@ -349,84 +352,88 @@ void loop()
         // when offTrack is true, this condition shouldn't be reached so PixyCam logic can start
         if ((rover.isOffLine(0) == true && rover.isOffLine(1) == true && rover.isOffLine(2) == true) && offTrack == false)
         {
-            if (timer1 < timeUntilOffTrack)
-            {
-                timer1++; // count up in time
-                delay(1);
-                return;
-            }
-            // if more than timeUntilOffTrack has passed
-            else
-            {
-                rover.motorSet(0);
-                rover.steerStraight();
-                delay(50);
-                Serial.println("All PRs had high signal for too long, stopping and reversing to relocate track");
-                rover.colorFlash(0, yellow[0], yellow[1], yellow[2], 125);
-                delay(125);
-                // int timer2 = 0;
-                bool alreadyReversing = false;
-                bool stopReversing = false;
-                // while loop to reverse until back on line or exceeded elapsed time + one second
-                while (!(rover.isOffLine(0) == true && rover.isOffLine(1) == false && rover.isOffLine(2) == true))
-                {
-                    for (int timer2 = 0; timer2 < (timer1 + 1000); timer2++)
-                    {
-                        if (alreadyReversing == false && stopReversing == false)
-                        {
-                            alreadyReversing = true;
-                            rover.motorSet(reverseSpeed1);
-                            if (lastLineLocation == 'L')
-                            {
-                                rover.steerRight(turnRadius1);
-                            }
-                            if (lastLineLocation == 'R')
-                            {
-                                rover.steerLeft(turnRadius1);
-                            }
-                            if (lastLineLocation == 'C')
-                            {
-                                rover.steerStraight();
-                            }
-                        }
-                        delay(1);
-                        if ((rover.isOffLine(0) == true && rover.isOffLine(1) == false && rover.isOffLine(2) == true) && stopReversing == false)
-                        {
-                            stopReversing = true;
-                            alreadyReversing = false;
-                        }
-                        else if (alreadyReversing == true)
-                        {
-                            return;
-                        }
-                        else if (stopReversing == true)
-                        {
-                            return;
-                        }
-                    }
-                        // if exceeded time, stopReversing would be true, else we stop
-                    if (stopReversing == false)
-                    {
-                        rover.motorSet(0);
-                        offTrack = true; // this should only happen if we reversed and it failed, so we are now off track
-                        return;
-                    }
-                }
-            }
+            // if (timer1 < timeUntilOffTrack)
+            // {
+            //     timer1++; // count up in time
+            //     delay(1);
+            //     return;
+            // }
+            // // if more than timeUntilOffTrack has passed
+            // else
+            // {
+            //     rover.motorSet(0);
+            //     rover.steerStraight();
+            //     delay(50);
+            //     Serial.println("All PRs had high signal for too long, stopping and reversing to relocate track");
+            //     rover.colorFlash(0, yellow[0], yellow[1], yellow[2], 125);
+            //     delay(125);
+            //     // int timer2 = 0;
+            //     bool alreadyReversing = false;
+            //     bool stopReversing = false;
+            //     // while loop to reverse until back on line or exceeded elapsed time + one second
+            //     while (!(rover.isOffLine(0) == true && rover.isOffLine(1) == false && rover.isOffLine(2) == true))
+            //     {
+            //         for (int timer2 = 0; timer2 < (timer1 + 1000); timer2++)
+            //         {
+            //             if (alreadyReversing == false && stopReversing == false)
+            //             {
+            //                 alreadyReversing = true;
+            //                 rover.motorSet(reverseSpeed1);
+            //                 if (lastLineLocation == 'L')
+            //                 {
+            //                     rover.steerRight(turnRadius1);
+            //                 }
+            //                 if (lastLineLocation == 'R')
+            //                 {
+            //                     rover.steerLeft(turnRadius1);
+            //                 }
+            //                 if (lastLineLocation == 'C')
+            //                 {
+            //                     rover.steerStraight();
+            //                 }
+            //             }
+            //             delay(1);
+            //             if ((rover.isOffLine(0) == true && rover.isOffLine(1) == false && rover.isOffLine(2) == true) && stopReversing == false)
+            //             {
+            //                 stopReversing = true;
+            //                 alreadyReversing = false;
+            //             }
+            //             else if (alreadyReversing == true)
+            //             {
+            //                 return;
+            //             }
+            //             else if (stopReversing == true)
+            //             {
+            //                 return;
+            //             }
+            //         }
+            //         // if exceeded time, stopReversing would be true, else we stop
+            //         if (stopReversing == false)
+            //         {
+            //             rover.motorSet(0);
+            //             offTrack = true; // this should only happen if we reversed and it failed, so we are now off track
+            //             return;
+            //         }
+            //     }
+            // }
+
+            // if (!(rover.isOffLine(0) == true && rover.isOffLine(1) == true && rover.isOffLine(2) == true))
+            // {
+            //     timer1 = 0; // resets timer1 if back on line or some other condition
+            // }
+            // else if (offTrack == false)
+            // {
+            //     return;
+            // }
         }
-        else
-        {
-            timer1 = 0; // resets timer1 if back on line or some other condition
-        }
-    }
 #pragma endregion
 
-    // exits loop early because cup has already been picked up if this is true
-    if (finished1 == true)
-    {
-        return;
+        // exits loop early because cup has already been picked up if this is true
+        if (finished1 == true)
+        {
+            return;
+        }
     }
-
 #pragma region Signature Detection(Transition)
     if (locatingTarget == false && offTrack == true)
     {
