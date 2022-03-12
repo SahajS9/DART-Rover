@@ -1,4 +1,4 @@
-#include <Arduino.h>   
+#include <Arduino.h>
 #include <SPI.h>
 #include <Pixy2.h>
 #include <Servo.h>
@@ -75,11 +75,9 @@ void Rover::begin()
     pinMode(_LED1_B, OUTPUT);
 };
 
-void Rover::calibrate(unsigned long int min[3], unsigned long int max[3]){
-    for (int i = 0; i<=2; i++){
-        _min[i] = min[i];
-        _max[i] = max[i];
-    };
+void Rover::calibrate(int min[3], int max[3]){
+    _min[3] = (float)min[3];
+    _max[3] = (float)max[3];
 };
 #pragma endregion
 
@@ -95,38 +93,33 @@ bool Rover::isOffLine(int pr)
     static int val[3] = {};
     float floatval[3] = {};
 
-    val[0] = 0;
-    int L_raw = analogRead(_L_PHOTORESISTOR);
-    val[0] = ((val[0] * 3) + L_raw) / 4;
-    floatval[0] = val[0]*(1/((float)_max[0] - (float)_min[0])) - (float)_min[0]*(1/((float)_max[0] - (float)_min[0]));
-
-    val[1] = 0;
-    int M_raw = analogRead(_M_PHOTORESISTOR);
-    val[1] = ((val[1] * 3) + M_raw) / 4;
-    floatval[1] = val[1]*(1/((float)_max[1] - (float)_min[1])) - (float)_min[1]*(1/((float)_max[1] - (float)_min[1]));
-
-    val[2] = 0;
-    int R_raw = analogRead(_R_PHOTORESISTOR);
-    val[2] = ((val[2] * 3) + R_raw) / 4;
-    floatval[2] = val[2]*(1/((float)_max[2] - (float)_min[2])) - (float)_min[2]*(1/((float)_max[2] - (float)_min[2]));
-
-    for (int i=0; i<=2; i++) {
-        Serial.print(floatval[i]);
-        Serial.print(' ');
-    }
-    Serial.print('\n');
-
     if (pr == 0)
     {
-        return (0==0);
+        val[0] = 0;
+        int L_raw = analogRead(_L_PHOTORESISTOR);
+        val[0] = ((val[0] * 3) + L_raw) / 4;
+        floatval[0] = val[0]*(1/((float)_max[0] - (float)_min[0])) - (float)_min[0]*(1/((float)_max[0] - (float)_min[0]));
+        
+        return (floatval[0] < 300);
     }
     else if (pr == 1)
     {
-        return (0==1);
+        val[1] = 0;
+        int M_raw = analogRead(_M_PHOTORESISTOR);
+        val[1] = ((val[1] * 3) + M_raw) / 4;
+        floatval[1] = val[1]*(1/((float)_max[1] - (float)_min[1])) - (float)_min[1]*(1/((float)_max[1] - (float)_min[1]));
+        Serial.print(floatval[1]); Serial.print("\n"); // extra verbosity, comment later
+
+        return (floatval[1] < 300);
     }
     else if (pr == 2)
     {
-        return (0==0);
+        val[2] = 0;
+        int R_raw = analogRead(_R_PHOTORESISTOR);
+        val[2] = ((val[2] * 3) + R_raw) / 4;
+        floatval[2] = val[2]*(1/((float)_max[2] - (float)_min[2])) - (float)_min[2]*(1/((float)_max[2] - (float)_min[2]));
+        
+        return (floatval[2] < 300);
     }
     else
     {
@@ -194,7 +187,7 @@ void Rover::motorSet(int speed)
     speed = (speed * 0.9) + 90;
     _motor.write(speed);
     Serial.print("Speed set to ");
-    Serial.print((speed - 90) / 0.9);
+    Serial.print(speed);
     Serial.print("\n");
 };
 #pragma endregion
@@ -219,7 +212,7 @@ void Rover::clawSet(bool status)
     else
     {
         Serial.print("Closing claw");
-        for (pos = 0; pos <= 60; pos += 1)
+        for (pos = 0; pos <= 50; pos += 1)
         {
             _smallservo.write(pos);
             delay(30);
