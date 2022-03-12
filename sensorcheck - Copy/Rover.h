@@ -42,7 +42,7 @@ class Rover
         );
 
         void begin();
-        void calibrate(unsigned long int min[3], unsigned long int max[3]);
+        void calibrate(int min[3], int max[3]);
 
         //steering controls
         void steerLeft(int degrees);
@@ -57,8 +57,8 @@ class Rover
         void motorSet(int speed);
 
         //photoresistor logic
-
-        int isOffLine(int pr);
+        // photoresistor logic - true = high, false = low
+        bool isOffLine(int pr);
         //led controls
         void colorSet(int group, int R, int G, int B);
         void colorFlash(int group, int R, int G, int B, int delay);
@@ -71,8 +71,8 @@ class Rover
         Pixy2 pixy;
     
     private:
-        unsigned long int _min[3];
-        unsigned long int _max[3];
+        float _min[3];
+        float _max[3];
         int _STEERING_SERVO;
         int _CLAW_SERVO;
         int _MOTOR;

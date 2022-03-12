@@ -97,8 +97,8 @@ bool Rover::isOffLine(int pr)
     static int val[3] = {};
     float floatval[3] = {};
 
-    const int _min[3] = {165, 127, 152};
-    const int _max[3] = {400, 300, 360};
+    const int _min[3] = {160, 110, 132};
+    const int _max[3] = {375, 290, 340};
 
     val[0] = 0;
     int L_raw = analogRead(_L_PHOTORESISTOR);
@@ -115,11 +115,10 @@ bool Rover::isOffLine(int pr)
     val[2] = ((val[2] * 3) + R_raw) / 4;
     floatval[2] = val[2] * (1 / ((float)_max[2] - (float)_min[2])) + (float)_min[2] * (1 / ((float)_max[2] - (float)_min[2]));
 
-    for (int i = 0; i <= 2; i++)
-    {
-        Serial.print(floatval[i]);
-        Serial.print(' ');
-    }
+    //    for (int i=0; i<=2; i++) {
+    //        Serial.print(floatval[i]);
+    //        Serial.print(' ');
+    //    }
     Serial.print('\n');
 
     if (pr == 0)
